@@ -1,0 +1,53 @@
+<div class="container">
+  <div class="page-head">
+    <div>
+      <h1>Utilisateurs</h1>
+      <p class="muted" style="margin: 0">Gérez les comptes, les rôles et l'accès.</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <app-loading-spinner />
+  } @else {
+    <div class="card table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Inscrit le</th><th>Statut</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (u of users(); track u.id) {
+            <tr>
+              <td>
+                <b>{{ u.fullName }}</b>
+                @if (u.id === me()?.id) { <span class="badge badge-orange">Vous</span> }
+              </td>
+              <td>{{ u.email }}</td>
+              <td>
+                <select style="width: 120px" [value]="u.role" [disabled]="u.id === me()?.id" (change)="setRole(u, $event)">
+                  <option value="USER">USER</option>
+                  <option value="ADMIN">ADMIN</option>
+                </select>
+              </td>
+              <td class="muted small">{{ u.createdAt | date: 'd MMM y' }}</td>
+              <td>
+                <span class="badge" [class.badge-green]="u.isActive" [class.badge-red]="!u.isActive">
+                  {{ u.isActive ? 'Actif' : 'Désactivé' }}
+                </span>
+              </td>
+              <td class="right">
+                @if (u.id !== me()?.id) {
+                  <div class="row" style="justify-content: flex-end">
+                    <button class="btn btn-outline btn-sm" (click)="toggleActive(u)">
+                      {{ u.isActive ? 'Désactiver' : 'Activer' }}
+                    </button>
+                    <button class="btn btn-danger btn-sm" (click)="remove(u)">Supprimer</button>
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

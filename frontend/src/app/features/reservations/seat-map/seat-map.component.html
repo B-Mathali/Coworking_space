@@ -1,0 +1,73 @@
+<div class="container">
+  <a routerLink="/spaces" class="back-link">← Retour aux espaces</a>
+
+  @if (loading()) {
+    <app-loading-spinner />
+  } @else {
+   @if (space(); as sp) {
+    <div class="page-head">
+      <div>
+        <h1>{{ sp.name }}</h1>
+        @if (sp.location) { <p class="muted" style="margin: 0">📍 {{ sp.location }}</p> }
+      </div>
+      <div class="row">
+        <span class="badge badge-green">{{ freeCount() }} libres</span>
+        @if (mineCount() > 0) { <span class="badge badge-blue">{{ mineCount() }} à moi</span> }
+      </div>
+    </div>
+
+    <div class="booking-layout">
+      <section>
+        <div class="card">
+          <app-time-slot-picker (slotChange)="onSlot($event)" />
+        </div>
+
+        <div class="card">
+          <div class="legend">
+            <span><i class="dot-available"></i>Libre</span>
+            <span><i class="dot-taken"></i>Occupée</span>
+            <span><i class="dot-mine"></i>Ma réservation</span>
+            <span><i class="dot-disabled"></i>Indisponible</span>
+          </div>
+
+          @if (seats().length === 0) {
+            <div class="empty">Aucune place n'a encore été créée dans cet espace.</div>
+          } @else {
+            <div class="plan-scroll">
+              <div class="plan" [style.width.px]="sp.planWidth" [style.height.px]="sp.planHeight">
+                @for (s of seats(); track s.id) {
+                  <button
+                    type="button"
+                    [class]="'seat seat-' + s.status.toLowerCase()"
+                    [class.selected]="s.id === selectedId()"
+                    [style.left.px]="s.posX"
+                    [style.top.px]="s.posY"
+                    [attr.aria-label]="'Place ' + s.label + ' — ' + s.status"
+                    (click)="select(s)"
+                  >
+                    {{ s.label }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <aside>
+        <app-seat-info-panel
+          [seat]="selected()"
+          [spaceName]="sp.name"
+          [slot]="slot()"
+          [busy]="busy()"
+          (reserve)="reserve()"
+          (cancelMine)="cancelMine()"
+          (closed)="selectedId.set(null)"
+        />
+      </aside>
+    </div>
+   } @else {
+    <div class="card empty">Espace introuvable.</div>
+   }
+  }
+</div>

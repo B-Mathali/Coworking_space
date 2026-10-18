@@ -1,0 +1,77 @@
+<div class="container">
+  <div class="page-head">
+    <div>
+      <h1>Réservations</h1>
+      <p class="muted" style="margin: 0">Toutes les réservations des utilisateurs.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="form-row">
+      <div class="form-group" style="margin: 0">
+        <label for="f-space">Espace</label>
+        <select id="f-space" [(ngModel)]="spaceId">
+          <option [ngValue]="null">Tous</option>
+          @for (s of spaces(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
+        </select>
+      </div>
+      <div class="form-group" style="margin: 0">
+        <label for="f-status">Statut</label>
+        <select id="f-status" [(ngModel)]="status">
+          <option value="">Tous</option>
+          <option value="CONFIRMED">Confirmées</option>
+          <option value="CANCELLED">Annulées</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin: 0">
+        <label for="f-from">Du</label>
+        <input id="f-from" type="date" [(ngModel)]="from" />
+      </div>
+      <div class="form-group" style="margin: 0">
+        <label for="f-to">Au</label>
+        <input id="f-to" type="date" [(ngModel)]="to" />
+      </div>
+    </div>
+    <div class="row mt">
+      <button class="btn btn-primary btn-sm" (click)="load()">Filtrer</button>
+      <button class="btn btn-outline btn-sm" (click)="reset()">Réinitialiser</button>
+      <span class="spacer"></span>
+      <span class="muted small">{{ rows().length }} résultat(s)</span>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <app-loading-spinner />
+  } @else if (rows().length === 0) {
+    <div class="card empty">Aucune réservation ne correspond.</div>
+  } @else {
+    <div class="card table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Utilisateur</th><th>Espace</th><th>Place</th><th>Date</th><th>Horaire</th><th>Statut</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (r of rows(); track r.id) {
+            <tr>
+              <td><b>{{ r.userName }}</b><br /><span class="muted small">{{ r.userEmail }}</span></td>
+              <td>{{ r.spaceName }}</td>
+              <td><span class="badge badge-blue">{{ r.seatLabel }}</span></td>
+              <td>{{ r.startTime | date: 'EEE d MMM y' }}</td>
+              <td>{{ r.startTime | date: 'HH:mm' }} → {{ r.endTime | date: 'HH:mm' }}</td>
+              <td>
+                <span class="badge" [class.badge-green]="r.status === 'CONFIRMED'" [class.badge-gray]="r.status === 'CANCELLED'">
+                  {{ r.status === 'CONFIRMED' ? 'Confirmée' : 'Annulée' }}
+                </span>
+              </td>
+              <td class="right">
+                @if (r.status === 'CONFIRMED') {
+                  <button class="btn btn-danger btn-sm" (click)="cancel(r)">Annuler</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

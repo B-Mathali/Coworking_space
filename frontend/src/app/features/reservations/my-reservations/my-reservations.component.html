@@ -1,0 +1,59 @@
+<div class="container">
+  <div class="page-head">
+    <div>
+      <h1>Mes réservations</h1>
+      <p class="muted" style="margin: 0">Retrouvez toutes vos places réservées.</p>
+    </div>
+    <a class="btn btn-primary" routerLink="/spaces">+ Nouvelle réservation</a>
+  </div>
+
+  <div class="tabs">
+    <button class="tab" [class.active]="tab() === 'upcoming'" (click)="tab.set('upcoming')">
+      À venir ({{ upcoming().length }})
+    </button>
+    <button class="tab" [class.active]="tab() === 'past'" (click)="tab.set('past')">
+      Passées ({{ past().length }})
+    </button>
+    <button class="tab" [class.active]="tab() === 'cancelled'" (click)="tab.set('cancelled')">
+      Annulées ({{ cancelled().length }})
+    </button>
+  </div>
+
+  @if (loading()) {
+    <app-loading-spinner />
+  } @else if (shown().length === 0) {
+    <div class="card empty">Aucune réservation dans cette catégorie.</div>
+  } @else {
+    <div class="card table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Espace</th><th>Place</th><th>Date</th><th>Horaire</th><th>Statut</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (r of shown(); track r.id) {
+            <tr>
+              <td><b>{{ r.spaceName }}</b></td>
+              <td><span class="badge badge-blue">{{ r.seatLabel }}</span></td>
+              <td>{{ r.startTime | date: 'EEE d MMM y' }}</td>
+              <td>{{ r.startTime | date: 'HH:mm' }} → {{ r.endTime | date: 'HH:mm' }}</td>
+              <td>
+                @if (r.status === 'CANCELLED') {
+                  <span class="badge badge-gray">Annulée</span>
+                } @else if (tab() === 'past') {
+                  <span class="badge badge-gray">Terminée</span>
+                } @else {
+                  <span class="badge badge-green">Confirmée</span>
+                }
+              </td>
+              <td class="right">
+                @if (tab() === 'upcoming') {
+                  <button class="btn btn-outline btn-sm" (click)="cancel(r)">Annuler</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

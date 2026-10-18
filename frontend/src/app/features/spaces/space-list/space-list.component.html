@@ -1,0 +1,20 @@
+<div class="container">
+  <div class="page-head">
+    <div>
+      <h1>Choisissez votre espace</h1>
+      <p class="muted" style="margin: 0">Sélectionnez une salle, puis cliquez sur une place libre pour la réserver.</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <app-loading-spinner />
+  } @else if (list().length === 0) {
+    <div class="card empty">Aucun espace disponible pour le moment.</div>
+  } @else {
+    <div class="grid grid-cards">
+      @for (s of list(); track s.id) {
+        <app-space-card [space]="s" />
+      }
+    </div>
+  }
+</div>

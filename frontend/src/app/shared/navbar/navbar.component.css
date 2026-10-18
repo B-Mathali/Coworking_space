@@ -1,0 +1,16 @@
+.nav { background: var(--navy); color: #fff; position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow); }
+.nav-inner { max-width: 1200px; margin: 0 auto; padding: .7rem 1.25rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+.brand { color: #fff; font-size: 1.2rem; font-weight: 500; display: flex; align-items: center; gap: .5rem; text-decoration: none !important; }
+.brand b { color: var(--orange); }
+.logo { background: var(--blue); width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; }
+.links { display: flex; gap: .25rem; flex: 1; flex-wrap: wrap; }
+.links a { color: #cbd5e1; padding: .4rem .8rem; border-radius: 8px; font-weight: 600; font-size: .92rem; text-decoration: none !important; }
+.links a:hover { background: var(--navy-2); color: #fff; }
+.links a.active { background: var(--blue); color: #fff; }
+.links a.admin-link { color: #fdba74; }
+.links a.admin-link.active { background: var(--orange); color: #fff; }
+.right-side { display: flex; align-items: center; gap: .6rem; }
+.who { font-size: .9rem; color: #e2e8f0; }
+.role { font-style: normal; background: var(--orange); color: #fff; font-size: .65rem; font-weight: 800; padding: .1rem .4rem; border-radius: 6px; margin-left: .3rem; }
+.out { background: transparent; color: #e2e8f0; border-color: #475569; }
+.out:hover { background: var(--navy-2) !important; }

@@ -1,0 +1,31 @@
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" routerLink="/">
+      <span class="logo">▦</span>
+      <span>Cowork<b>Space</b></span>
+    </a>
+
+    <nav class="links">
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/spaces" routerLinkActive="active">Espaces</a>
+        <a routerLink="/my-reservations" routerLinkActive="active">Mes réservations</a>
+        @if (auth.isAdmin()) {
+          <a routerLink="/admin" routerLinkActive="active" class="admin-link">⚙ Administration</a>
+        }
+      }
+    </nav>
+
+    <div class="right-side">
+      @if (auth.currentUser(); as u) {
+        <span class="who">
+          {{ u.fullName }}
+          @if (auth.isAdmin()) { <em class="role">ADMIN</em> }
+        </span>
+        <button class="btn btn-outline btn-sm out" (click)="auth.logout()">Déconnexion</button>
+      } @else {
+        <a class="btn btn-outline btn-sm out" routerLink="/login">Connexion</a>
+        <a class="btn btn-accent btn-sm" routerLink="/register">Inscription</a>
+      }
+    </div>
+  </div>
+</header>

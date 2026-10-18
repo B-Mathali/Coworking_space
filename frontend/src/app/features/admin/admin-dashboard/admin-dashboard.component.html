@@ -1,0 +1,56 @@
+<div class="container">
+  <div class="page-head">
+    <div>
+      <h1>Tableau de bord</h1>
+      <p class="muted" style="margin: 0">Vue d'ensemble de l'application.</p>
+    </div>
+    <div class="row">
+      <a class="btn btn-outline" routerLink="../seats">Gérer les places</a>
+      <a class="btn btn-primary" routerLink="../reservations">Voir les réservations</a>
+    </div>
+  </div>
+
+  @if (stats(); as s) {
+    <div class="grid grid-stats">
+      <div class="card stat-card">
+        <div class="stat-value">{{ s.totalUsers }}</div>
+        <div class="stat-label">Utilisateurs</div>
+      </div>
+      <div class="card stat-card navy">
+        <div class="stat-value">{{ s.totalSpaces }}</div>
+        <div class="stat-label">Espaces</div>
+      </div>
+      <div class="card stat-card navy">
+        <div class="stat-value">{{ s.activeSeats }}<span class="muted small"> / {{ s.totalSeats }}</span></div>
+        <div class="stat-label">Places actives</div>
+      </div>
+      <div class="card stat-card orange">
+        <div class="stat-value">{{ s.reservationsToday }}</div>
+        <div class="stat-label">Réservations aujourd'hui</div>
+      </div>
+      <div class="card stat-card green">
+        <div class="stat-value">{{ s.upcomingReservations }}</div>
+        <div class="stat-label">Réservations à venir</div>
+      </div>
+      <div class="card stat-card green">
+        <div class="stat-value">{{ s.occupancyRate }}%</div>
+        <div class="stat-label">Occupation en ce moment ({{ s.currentlyOccupied }} places)</div>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <h2>Réservations des 7 derniers jours</h2>
+      <div class="chart">
+        @for (d of s.last7Days; track d.date) {
+          <div class="bar-col">
+            <span class="bar-value">{{ d.count }}</span>
+            <div class="bar" [style.height.%]="height(d.count)"></div>
+            <span class="bar-label">{{ d.date | date: 'EEE d' }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <app-loading-spinner />
+  }
+</div>

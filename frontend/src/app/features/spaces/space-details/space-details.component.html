@@ -1,0 +1,21 @@
+<div class="container" style="max-width: 760px">
+  <a routerLink="/spaces" class="back-link">← Retour aux espaces</a>
+
+  @if (loading()) {
+    <app-loading-spinner />
+  } @else {
+    @if (space(); as s) {
+      <div class="card">
+        <div class="row">
+          <h1 style="margin: 0">{{ s.name }}</h1>
+          @if (!s.isActive) { <span class="badge badge-gray">Fermé</span> }
+        </div>
+        @if (s.location) { <p class="muted">📍 {{ s.location }}</p> }
+        <p>{{ s.description || 'Aucune description.' }}</p>
+        <a class="btn btn-primary" [routerLink]="['/spaces', s.id, 'book']">Voir le plan et réserver</a>
+      </div>
+    } @else {
+      <div class="card empty">Espace introuvable.</div>
+    }
+  }
+</div>

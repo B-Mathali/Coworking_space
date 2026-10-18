@@ -1,0 +1,88 @@
+<div class="container">
+  <div class="page-head">
+    <div>
+      <h1>Espaces</h1>
+      <p class="muted" style="margin: 0">Créez les salles, puis dessinez leur plan de places.</p>
+    </div>
+    <button class="btn btn-primary" (click)="openNew()">+ Nouvel espace</button>
+  </div>
+
+  @if (loading()) {
+    <app-loading-spinner />
+  } @else if (spaces().length === 0) {
+    <div class="card empty">Aucun espace. Créez le premier pour commencer.</div>
+  } @else {
+    <div class="card table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Nom</th><th>Lieu</th><th>Places</th><th>Plan</th><th>Statut</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (s of spaces(); track s.id) {
+            <tr>
+              <td><b>{{ s.name }}</b></td>
+              <td>{{ s.location || '—' }}</td>
+              <td>{{ s.seatCount ?? 0 }}</td>
+              <td class="muted small">{{ s.planWidth }}×{{ s.planHeight }}</td>
+              <td>
+                <span class="badge" [class.badge-green]="s.isActive" [class.badge-gray]="!s.isActive">
+                  {{ s.isActive ? 'Ouvert' : 'Fermé' }}
+                </span>
+              </td>
+              <td class="right">
+                <div class="row" style="justify-content: flex-end">
+                  <a class="btn btn-primary btn-sm" [routerLink]="['../seats', s.id]">Plan des places</a>
+                  <button class="btn btn-outline btn-sm" (click)="openEdit(s)">Modifier</button>
+                  <button class="btn btn-outline btn-sm" (click)="toggle(s)">{{ s.isActive ? 'Fermer' : 'Ouvrir' }}</button>
+                  <button class="btn btn-danger btn-sm" (click)="remove(s)">Supprimer</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@if (editing() !== null) {
+  <div class="modal-backdrop" (click)="close()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ editing() === 'new' ? 'Nouvel espace' : "Modifier l'espace" }}</h2>
+      <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <div class="form-group">
+          <label for="sp-name">Nom</label>
+          <input id="sp-name" formControlName="name" />
+          @if (form.controls.name.touched && form.controls.name.invalid) {
+            <div class="field-error">Nom requis.</div>
+          }
+        </div>
+        <div class="form-group">
+          <label for="sp-loc">Lieu</label>
+          <input id="sp-loc" formControlName="location" placeholder="Ex. Rez-de-chaussée, bâtiment A" />
+        </div>
+        <div class="form-group">
+          <label for="sp-desc">Description</label>
+          <textarea id="sp-desc" rows="3" formControlName="description"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sp-w">Largeur du plan (px)</label>
+            <input id="sp-w" type="number" formControlName="planWidth" />
+          </div>
+          <div class="form-group">
+            <label for="sp-h">Hauteur du plan (px)</label>
+            <input id="sp-h" type="number" formControlName="planHeight" />
+          </div>
+        </div>
+        <label class="row small" style="margin-bottom: 1rem">
+          <input type="checkbox" formControlName="isActive" /> Ouvert à la réservation
+        </label>
+        <div class="row" style="justify-content: flex-end">
+          <button type="button" class="btn btn-outline" (click)="close()">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
