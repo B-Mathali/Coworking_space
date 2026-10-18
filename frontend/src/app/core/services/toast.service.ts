@@ -35,9 +35,13 @@ export class ToastService {
     return fallback;
   }
 
+  dismiss(id: number) {
+    this.toasts.update((t) => t.filter((x) => x.id !== id));
+  }
+
   private push(text: string, type: Toast['type']) {
     const id = this.nextId++;
     this.toasts.update((t) => [...t, { id, text, type }]);
-    setTimeout(() => this.toasts.update((t) => t.filter((x) => x.id !== id)), 4500);
+    setTimeout(() => this.dismiss(id), 4500);
   }
 }

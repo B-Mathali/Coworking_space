@@ -1,32 +1,40 @@
-<div class="container" style="max-width: 440px; padding-top: 3rem">
-  <div class="card">
-    <h1>Connexion</h1>
-    <p class="muted">Connectez-vous pour réserver votre place.</p>
+<app-auth-shell title="Bon retour" subtitle="Connectez-vous pour réserver votre place.">
+  @if (error(); as e) {
+    <div class="alert alert-error"><app-icon name="alert-circle" [size]="17" /> <span>{{ e }}</span></div>
+  }
 
-    @if (error(); as e) { <div class="alert alert-error">{{ e }}</div> }
-
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input id="email" type="email" formControlName="email" autocomplete="email" />
-        @if (form.controls.email.touched && form.controls.email.invalid) {
-          <div class="field-error">Email invalide.</div>
-        }
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="form-group">
+      <label for="email">Adresse email</label>
+      <div class="input-icon">
+        <span class="i-lead"><app-icon name="mail" [size]="17" /></span>
+        <input id="email" type="email" formControlName="email" autocomplete="email" placeholder="vous@exemple.com" />
       </div>
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <div class="field-error"><app-icon name="alert-circle" [size]="13" /> Email invalide.</div>
+      }
+    </div>
 
-      <div class="form-group">
-        <label for="password">Mot de passe</label>
-        <input id="password" type="password" formControlName="password" autocomplete="current-password" />
-        @if (form.controls.password.touched && form.controls.password.invalid) {
-          <div class="field-error">6 caractères minimum.</div>
-        }
+    <div class="form-group">
+      <label for="password">Mot de passe</label>
+      <div class="input-icon">
+        <span class="i-lead"><app-icon name="lock" [size]="17" /></span>
+        <input id="password" [type]="showPwd() ? 'text' : 'password'" formControlName="password" autocomplete="current-password" placeholder="••••••••" />
+        <button type="button" class="i-trail btn btn-ghost btn-sm btn-icon" (click)="showPwd.set(!showPwd())" [attr.aria-label]="showPwd() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">
+          <app-icon [name]="showPwd() ? 'eye-off' : 'eye'" [size]="16" />
+        </button>
       </div>
+      @if (form.controls.password.touched && form.controls.password.invalid) {
+        <div class="field-error"><app-icon name="alert-circle" [size]="13" /> 6 caractères minimum.</div>
+      }
+    </div>
 
-      <button class="btn btn-primary btn-block" type="submit" [disabled]="loading()">
-        {{ loading() ? 'Connexion…' : 'Se connecter' }}
-      </button>
-    </form>
+    <button class="btn btn-primary btn-lg btn-block mt" type="submit" [disabled]="loading()">
+      @if (loading()) { Connexion… } @else { Se connecter <app-icon name="arrow-right" [size]="17" /> }
+    </button>
+  </form>
 
-    <p class="muted small mt">Pas de compte ? <a routerLink="/register">Créer un compte</a></p>
-  </div>
-</div>
+  <p class="muted small mt" style="text-align: center; margin-top: 1.5rem">
+    Pas encore de compte ? <a routerLink="/register" class="strong" style="color: var(--primary)">Créer un compte</a>
+  </p>
+</app-auth-shell>

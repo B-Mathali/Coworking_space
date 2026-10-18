@@ -2,20 +2,32 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Space } from '../../../core/models/space.model';
+import { ConfirmService } from '../../../core/services/confirm.service';
 import { SpaceService } from '../../../core/services/space.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
+import { IconComponent } from '../../../shared/icon/icon.component';
 
 @Component({
   selector: 'app-admin-spaces',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, LoadingSpinnerComponent],
+  imports: [ReactiveFormsModule, RouterLink, IconComponent],
   templateUrl: './admin-spaces.component.html',
+  styles: [
+    `
+      .sp-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--primary-soft); color: var(--primary); flex-shrink: 0; }
+      .status-btn { border: 0; background: none; padding: 0; cursor: pointer; border-radius: 999px; }
+      .del:hover:not(:disabled) { background: var(--danger-soft); color: var(--danger); }
+      .toggle-row { align-items: flex-start; padding: .85rem 1rem; border-radius: var(--r); border: 1px solid var(--border); background: var(--bg-elev); }
+      .toggle-row div { display: flex; flex-direction: column; line-height: 1.35; }
+      .toggle-row b { color: var(--text); font-size: .9rem; }
+    `,
+  ],
 })
 export class AdminSpacesComponent implements OnInit {
   private readonly api = inject(SpaceService);
   private readonly toast = inject(ToastService);
   private readonly fb = inject(FormBuilder);
+  private readonly confirm = inject(ConfirmService);
 
   readonly spaces = signal<Space[]>([]);
   readonly loading = signal(true);
@@ -86,8 +98,14 @@ export class AdminSpacesComponent implements OnInit {
     });
   }
 
-  remove(s: Space) {
-    if (!confirm(`Supprimer « ${s.name} » ? Ses places et leurs réservations seront supprimées.`)) return;
+  async remove(s: Space) {
+    const ok = await this.confirm.ask({
+      title: `Supprimer « ${s.name} » ?`,
+      message: 'Ses places et toutes leurs réservations seront définitivement supprimées.',
+      confirmText: 'Supprimer',
+      danger: true,
+    });
+    if (!ok) return;
     this.api.remove(s.id).subscribe({
       next: () => {
         this.toast.success('Espace supprimé.');

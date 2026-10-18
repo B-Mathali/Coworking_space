@@ -1,46 +1,66 @@
 <div class="container">
   <div class="page-head">
     <div>
+      <span class="eyebrow"><app-icon name="users" [size]="14" /> Gestion</span>
       <h1>Utilisateurs</h1>
-      <p class="muted" style="margin: 0">Gérez les comptes, les rôles et l'accès.</p>
+      <p class="lead">Gérez les comptes, les rôles et l'accès.</p>
     </div>
+    @if (!loading()) {
+      <div class="input-icon search">
+        <span class="i-lead"><app-icon name="search" [size]="16" /></span>
+        <input type="search" placeholder="Nom ou email…" [value]="query()" (input)="query.set($any($event.target).value)" aria-label="Rechercher un utilisateur" />
+      </div>
+    }
   </div>
 
   @if (loading()) {
-    <app-loading-spinner />
+    <div class="skeleton" style="height: 320px; border-radius: var(--r-lg)"></div>
+  } @else if (filtered().length === 0) {
+    <div class="card empty-state">
+      <div class="empty-icon"><app-icon name="users" [size]="26" /></div>
+      <h3>Aucun utilisateur</h3>
+      <p>Aucun compte ne correspond à votre recherche.</p>
+    </div>
   } @else {
-    <div class="card table-wrap">
+    <div class="card card-flush table-wrap">
       <table class="table">
         <thead>
-          <tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Inscrit le</th><th>Statut</th><th></th></tr>
+          <tr><th>Utilisateur</th><th>Rôle</th><th>Inscrit le</th><th>Statut</th><th class="right">Actions</th></tr>
         </thead>
         <tbody>
-          @for (u of users(); track u.id) {
-            <tr>
+          @for (u of filtered(); track u.id) {
+            <tr [class.inactive]="!u.isActive">
               <td>
-                <b>{{ u.fullName }}</b>
-                @if (u.id === me()?.id) { <span class="badge badge-orange">Vous</span> }
+                <div class="user-cell">
+                  <app-avatar [name]="u.fullName" />
+                  <div style="min-width: 0">
+                    <div class="name row" style="gap: .4rem">
+                      {{ u.fullName }}
+                      @if (u.id === me()?.id) { <span class="badge badge-orange">Vous</span> }
+                    </div>
+                    <div class="sub truncate">{{ u.email }}</div>
+                  </div>
+                </div>
               </td>
-              <td>{{ u.email }}</td>
               <td>
-                <select style="width: 120px" [value]="u.role" [disabled]="u.id === me()?.id" (change)="setRole(u, $event)">
-                  <option value="USER">USER</option>
-                  <option value="ADMIN">ADMIN</option>
+                <select class="role-select" [class.admin]="u.role === 'ADMIN'" [value]="u.role" [disabled]="u.id === me()?.id" (change)="setRole(u, $event)" aria-label="Rôle">
+                  <option value="USER">Membre</option>
+                  <option value="ADMIN">Admin</option>
                 </select>
               </td>
               <td class="muted small">{{ u.createdAt | date: 'd MMM y' }}</td>
               <td>
-                <span class="badge" [class.badge-green]="u.isActive" [class.badge-red]="!u.isActive">
+                <span class="badge badge-dot" [class.badge-green]="u.isActive" [class.badge-red]="!u.isActive">
                   {{ u.isActive ? 'Actif' : 'Désactivé' }}
                 </span>
               </td>
-              <td class="right">
+              <td>
                 @if (u.id !== me()?.id) {
-                  <div class="row" style="justify-content: flex-end">
+                  <div class="actions">
                     <button class="btn btn-outline btn-sm" (click)="toggleActive(u)">
-                      {{ u.isActive ? 'Désactiver' : 'Activer' }}
+                      <app-icon name="power" [size]="14" /> {{ u.isActive ? 'Désactiver' : 'Activer' }}
                     </button>
-                    <button class="btn btn-danger btn-sm" (click)="remove(u)">Supprimer</button>
+                    <button class="btn btn-ghost btn-sm btn-icon del" (click)="remove(u)" title="Supprimer" aria-label="Supprimer"><app-icon name="trash" [size]="15" /></button>
                   </div>
                 }
               </td>

@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Slot } from '../../../core/models/space.model';
+import { IconComponent } from '../../../shared/icon/icon.component';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const toDateStr = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -10,37 +11,54 @@ const toTimeStr = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 @Component({
   selector: 'app-time-slot-picker',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, IconComponent],
   template: `
-    <div class="form-row">
-      <div class="form-group" style="margin: 0">
-        <label for="slot-date">Date</label>
+    <div class="fields">
+      <div class="f f-date">
+        <label for="slot-date"><app-icon name="calendar" [size]="14" /> Date</label>
         <input id="slot-date" type="date" [min]="today" [ngModel]="date()" (ngModelChange)="onDate($event)" />
       </div>
-      <div class="form-group" style="margin: 0">
-        <label for="slot-start">De</label>
-        <input id="slot-start" type="time" step="900" [ngModel]="startT()" (ngModelChange)="onStart($event)" />
+      <div class="f">
+        <label for="slot-start"><app-icon name="clock" [size]="14" /> De</label>
+        <input id="slot-start" type="time" step="900" [ngModel]="startT()" (ngModelChange)="onStart($event)" [class.is-invalid]="!valid()" />
       </div>
-      <div class="form-group" style="margin: 0">
+      <span class="arrow" aria-hidden="true"><app-icon name="arrow-right" [size]="16" /></span>
+      <div class="f">
         <label for="slot-end">À</label>
-        <input id="slot-end" type="time" step="900" [ngModel]="endT()" (ngModelChange)="onEnd($event)" />
+        <input id="slot-end" type="time" step="900" [ngModel]="endT()" (ngModelChange)="onEnd($event)" [class.is-invalid]="!valid()" />
       </div>
+      @if (valid()) {
+        <span class="dur badge badge-blue tabular"><app-icon name="clock" [size]="12" /> {{ durationLabel() }}</span>
+      }
     </div>
 
-    <div class="row" style="margin-top: .75rem">
-      <span class="muted small">Raccourcis :</span>
+    <div class="chip-row presets">
       @for (d of durations; track d) {
-        <button type="button" class="btn btn-outline btn-sm" (click)="duration(d)">{{ d }} h</button>
+        <button type="button" class="chip" [class.active]="hours() === d" (click)="duration(d)">{{ d }} h</button>
       }
-      <button type="button" class="btn btn-outline btn-sm" (click)="preset('09:00', '12:00')">Matin</button>
-      <button type="button" class="btn btn-outline btn-sm" (click)="preset('14:00', '18:00')">Après-midi</button>
-      <button type="button" class="btn btn-outline btn-sm" (click)="preset('09:00', '18:00')">Journée</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button type="button" class="chip" [class.active]="isPreset('09:00', '12:00')" (click)="preset('09:00', '12:00')">Matin</button>
+      <button type="button" class="chip" [class.active]="isPreset('14:00', '18:00')" (click)="preset('14:00', '18:00')">Après-midi</button>
+      <button type="button" class="chip" [class.active]="isPreset('09:00', '18:00')" (click)="preset('09:00', '18:00')">Journée</button>
     </div>
 
     @if (!valid()) {
-      <div class="field-error" style="margin-top: .5rem">L'heure de fin doit être après l'heure de début.</div>
+      <div class="field-error"><app-icon name="alert-circle" [size]="13" /> L'heure de fin doit être après l'heure de début.</div>
     }
   `,
+  styles: [
+    `
+      .fields { display: flex; align-items: flex-end; gap: .65rem; flex-wrap: wrap; }
+      .f { display: flex; flex-direction: column; min-width: 110px; flex: 1; }
+      .f-date { flex: 1.6; min-width: 170px; }
+      .f label { display: inline-flex; align-items: center; gap: .3rem; font-size: .78rem; font-weight: 650; color: var(--text-2); margin-bottom: .35rem; }
+      .arrow { color: var(--text-3); height: 42px; display: grid; place-items: center; }
+      .dur { height: 42px; padding: 0 .85rem; border-radius: var(--r-sm); }
+      .presets { margin-top: .9rem; }
+      .sep { width: 1px; height: 20px; background: var(--border-strong); margin: 0 .2rem; }
+      @media (max-width: 560px) { .arrow { display: none; } .dur { width: 100%; justify-content: center; } }
+    `,
+  ],
 })
 export class TimeSlotPickerComponent implements OnInit {
   readonly slotChange = output<Slot>();
@@ -52,6 +70,19 @@ export class TimeSlotPickerComponent implements OnInit {
   readonly startT = signal('09:00');
   readonly endT = signal('12:00');
   readonly valid = computed(() => this.endT() > this.startT());
+
+  /** Durée du créneau en heures (décimales possibles). */
+  readonly hours = computed(() => {
+    const [sh, sm] = this.startT().split(':').map(Number);
+    const [eh, em] = this.endT().split(':').map(Number);
+    return (eh * 60 + em - (sh * 60 + sm)) / 60;
+  });
+  readonly durationLabel = computed(() => {
+    const mins = Math.round(this.hours() * 60);
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m ? `${h} h ${pad(m)}` : `${h} h`;
+  });
 
   ngOnInit() {
     // Par défaut : prochaine heure pleine, pour 2 h (ou demain 9h–12h si on est tard)
@@ -100,6 +131,10 @@ export class TimeSlotPickerComponent implements OnInit {
     this.startT.set(start);
     this.endT.set(end);
     this.emit();
+  }
+
+  isPreset(start: string, end: string): boolean {
+    return this.startT() === start && this.endT() === end;
   }
 
   private emit() {

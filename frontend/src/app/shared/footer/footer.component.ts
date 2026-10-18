@@ -3,10 +3,19 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-footer',
   standalone: true,
-  template: `<footer>© {{ year }} CoworkSpace — Projet Cloud TEK-UP</footer>`,
+  template: `
+    <footer>
+      <div class="inner">
+        <span><b>CoworkSpace</b> · Réservez votre place en quelques secondes.</span>
+        <span>© {{ year }} — Projet Cloud TEK-UP</span>
+      </div>
+    </footer>
+  `,
   styles: [
     `
-      footer { text-align: center; padding: 1.25rem; font-size: .82rem; color: var(--gray-500); border-top: 1px solid var(--gray-200); background: #fff; }
+      footer { border-top: 1px solid var(--border); font-size: .82rem; color: var(--text-3); }
+      .inner { max-width: 1240px; margin: 0 auto; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; gap: .5rem 1rem; flex-wrap: wrap; }
+      b { color: var(--text-2); }
     `,
   ],
 })

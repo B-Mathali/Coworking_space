@@ -4,20 +4,31 @@ import { FormsModule } from '@angular/forms';
 import { Reservation, ReservationStatus } from '../../../core/models/reservation.model';
 import { Space } from '../../../core/models/space.model';
 import { AdminService } from '../../../core/services/admin.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
 import { SpaceService } from '../../../core/services/space.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
+import { AvatarComponent } from '../../../shared/avatar/avatar.component';
+import { IconComponent } from '../../../shared/icon/icon.component';
 
 @Component({
   selector: 'app-admin-reservations',
   standalone: true,
-  imports: [FormsModule, DatePipe, LoadingSpinnerComponent],
+  imports: [FormsModule, DatePipe, IconComponent, AvatarComponent],
   templateUrl: './admin-reservations.component.html',
+  styles: [
+    `
+      .filters .form-row { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); align-items: end; }
+      .filter-actions { display: flex; gap: .35rem; }
+      .filter-actions .btn { --btn-h: 42px; }
+      .filter-actions .btn-primary { flex: 1; }
+    `,
+  ],
 })
 export class AdminReservationsComponent implements OnInit {
   private readonly admin = inject(AdminService);
   private readonly spacesApi = inject(SpaceService);
   private readonly toast = inject(ToastService);
+  private readonly confirm = inject(ConfirmService);
 
   readonly rows = signal<Reservation[]>([]);
   readonly spaces = signal<Space[]>([]);
@@ -57,8 +68,15 @@ export class AdminReservationsComponent implements OnInit {
     this.load();
   }
 
-  cancel(r: Reservation) {
-    if (!confirm(`Annuler la réservation de ${r.userName} (place ${r.seatLabel}) ?`)) return;
+  async cancel(r: Reservation) {
+    const ok = await this.confirm.ask({
+      title: 'Annuler cette réservation ?',
+      message: `Réservation de ${r.userName} — place ${r.seatLabel} (${r.spaceName}).`,
+      confirmText: 'Oui, annuler',
+      cancelText: 'Garder',
+      danger: true,
+    });
+    if (!ok) return;
     this.admin.cancelReservation(r.id).subscribe({
       next: () => {
         this.toast.success('Réservation annulée.');

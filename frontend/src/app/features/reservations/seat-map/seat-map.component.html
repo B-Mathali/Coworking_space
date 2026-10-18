@@ -1,5 +1,5 @@
 <div class="container">
-  <a routerLink="/spaces" class="back-link">← Retour aux espaces</a>
+  <a routerLink="/spaces" class="back-link"><app-icon name="arrow-left" [size]="16" /> Tous les espaces</a>
 
   @if (loading()) {
     <app-loading-spinner />
@@ -7,31 +7,44 @@
    @if (space(); as sp) {
     <div class="page-head">
       <div>
+        <span class="eyebrow"><app-icon name="calendar-check" [size]="14" /> Réservation</span>
         <h1>{{ sp.name }}</h1>
-        @if (sp.location) { <p class="muted" style="margin: 0">📍 {{ sp.location }}</p> }
+        @if (sp.location) { <p class="lead row" style="gap: .3rem"><app-icon name="pin" [size]="16" /> {{ sp.location }}</p> }
       </div>
-      <div class="row">
-        <span class="badge badge-green">{{ freeCount() }} libres</span>
-        @if (mineCount() > 0) { <span class="badge badge-blue">{{ mineCount() }} à moi</span> }
+      <div class="counters">
+        <div class="counter"><span class="c-dot dot-available"></span><b class="tabular">{{ freeCount() }}</b> libres</div>
+        <div class="counter"><span class="c-dot dot-taken"></span><b class="tabular">{{ takenCount() }}</b> occupées</div>
+        @if (mineCount() > 0) {
+          <div class="counter mine"><span class="c-dot dot-mine"></span><b class="tabular">{{ mineCount() }}</b> à moi</div>
+        }
       </div>
     </div>
 
-    <div class="booking-layout">
+    <div class="split-layout">
       <section>
         <div class="card">
+          <div class="step"><span>1</span> Choisissez votre créneau</div>
           <app-time-slot-picker (slotChange)="onSlot($event)" />
         </div>
 
         <div class="card">
-          <div class="legend">
-            <span><i class="dot-available"></i>Libre</span>
-            <span><i class="dot-taken"></i>Occupée</span>
-            <span><i class="dot-mine"></i>Ma réservation</span>
-            <span><i class="dot-disabled"></i>Indisponible</span>
+          <div class="card-head">
+            <div class="step" style="margin: 0"><span>2</span> Sélectionnez une place</div>
+            <span class="spacer"></span>
+            <div class="legend">
+              <span><i class="dot-available"></i>Libre</span>
+              <span><i class="dot-taken"></i>Occupée</span>
+              <span><i class="dot-mine"></i>Ma réservation</span>
+              <span><i class="dot-disabled"></i>Indisponible</span>
+            </div>
           </div>
 
           @if (seats().length === 0) {
-            <div class="empty">Aucune place n'a encore été créée dans cet espace.</div>
+            <div class="empty-state">
+              <div class="empty-icon"><app-icon name="seat" [size]="26" /></div>
+              <h3>Aucune place</h3>
+              <p>Aucune place n'a encore été créée dans cet espace.</p>
+            </div>
           } @else {
             <div class="plan-scroll">
               <div class="plan" [style.width.px]="sp.planWidth" [style.height.px]="sp.planHeight">
@@ -42,7 +55,8 @@
                     [class.selected]="s.id === selectedId()"
                     [style.left.px]="s.posX"
                     [style.top.px]="s.posY"
-                    [attr.aria-label]="'Place ' + s.label + ' — ' + s.status"
+                    [attr.aria-label]="'Place ' + s.label + ' — ' + statusLabel[s.status]"
+                    [attr.title]="'Place ' + s.label + ' — ' + statusLabel[s.status]"
                     (click)="select(s)"
                   >
                     {{ s.label }}
@@ -50,11 +64,12 @@
                 }
               </div>
             </div>
+            <p class="muted xs mt-sm row" style="gap: .35rem"><app-icon name="refresh" [size]="12" /> Le plan se met à jour automatiquement toutes les 15 secondes.</p>
           }
         </div>
       </section>
 
-      <aside>
+      <aside class="panel">
         <app-seat-info-panel
           [seat]="selected()"
           [spaceName]="sp.name"
@@ -67,7 +82,12 @@
       </aside>
     </div>
    } @else {
-    <div class="card empty">Espace introuvable.</div>
+    <div class="card empty-state">
+      <div class="empty-icon"><app-icon name="building" [size]="26" /></div>
+      <h3>Espace introuvable</h3>
+      <p>Cet espace n'existe pas ou a été supprimé.</p>
+      <a class="btn btn-outline btn-sm" routerLink="/spaces">Retour aux espaces</a>
+    </div>
    }
   }
 </div>

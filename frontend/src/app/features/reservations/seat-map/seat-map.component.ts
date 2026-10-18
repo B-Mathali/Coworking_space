@@ -1,10 +1,11 @@
 import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { SeatAvailability, Slot, Space } from '../../../core/models/space.model';
+import { SeatAvailability, SeatStatus, Slot, Space } from '../../../core/models/space.model';
 import { ReservationService } from '../../../core/services/reservation.service';
 import { SeatService } from '../../../core/services/seat.service';
 import { SpaceService } from '../../../core/services/space.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { IconComponent } from '../../../shared/icon/icon.component';
 import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
 import { SeatInfoPanelComponent } from '../seat-info-panel/seat-info-panel.component';
 import { TimeSlotPickerComponent } from '../time-slot-picker/time-slot-picker.component';
@@ -15,7 +16,7 @@ const REFRESH_MS = 15_000;
 @Component({
   selector: 'app-seat-map',
   standalone: true,
-  imports: [RouterLink, LoadingSpinnerComponent, TimeSlotPickerComponent, SeatInfoPanelComponent],
+  imports: [RouterLink, LoadingSpinnerComponent, TimeSlotPickerComponent, SeatInfoPanelComponent, IconComponent],
   templateUrl: './seat-map.component.html',
   styleUrl: './seat-map.component.css',
 })
@@ -39,6 +40,14 @@ export class SeatMapComponent implements OnInit {
   readonly selected = computed(() => this.seats().find((s) => s.id === this.selectedId()) ?? null);
   readonly freeCount = computed(() => this.seats().filter((s) => s.status === 'AVAILABLE').length);
   readonly mineCount = computed(() => this.seats().filter((s) => s.status === 'MINE').length);
+  readonly takenCount = computed(() => this.seats().filter((s) => s.status === 'TAKEN').length);
+
+  readonly statusLabel: Record<SeatStatus, string> = {
+    AVAILABLE: 'libre',
+    TAKEN: 'occupée',
+    MINE: 'ma réservation',
+    DISABLED: 'indisponible',
+  };
 
   ngOnInit() {
     this.spacesApi.get(Number(this.id())).subscribe({

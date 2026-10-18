@@ -2,10 +2,28 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <title>Coworking — Réservation de places</title>
+  <title>CoworkSpace — Réservation de places</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Crect x='8' y='9' width='16' height='10' rx='2' fill='white'/%3E%3Crect x='11' y='21' width='10' height='3' rx='1.5' fill='%23f97316'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#f6f5f2">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%233355ff'/%3E%3Crect x='7' y='7' width='8' height='8' rx='2.5' fill='white'/%3E%3Crect x='17' y='7' width='8' height='8' rx='2.5' fill='white' opacity='.55'/%3E%3Crect x='7' y='17' width='8' height='8' rx='2.5' fill='white' opacity='.55'/%3E%3Crect x='17' y='17' width='8' height='8' rx='2.5' fill='%23ff7a45'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    // Applique le thème avant le premier rendu (évite le flash clair → sombre).
+    (function () {
+      try {
+        var t = localStorage.getItem('cw_theme');
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

@@ -3,11 +3,11 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-loading-spinner',
   standalone: true,
-  template: `<div class="wrap"><div class="spin"></div></div>`,
+  template: `<div class="wrap" role="status" aria-label="Chargement"><div class="spin"></div></div>`,
   styles: [
     `
-      .wrap { display: flex; justify-content: center; padding: 3rem; }
-      .spin { width: 38px; height: 38px; border: 4px solid var(--blue-100); border-top-color: var(--blue); border-radius: 50%; animation: r .8s linear infinite; }
+      .wrap { display: flex; justify-content: center; padding: 4rem 1rem; }
+      .spin { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--surface-3); border-top-color: var(--primary); animation: r .7s linear infinite; }
       @keyframes r { to { transform: rotate(360deg); } }
     `,
   ],

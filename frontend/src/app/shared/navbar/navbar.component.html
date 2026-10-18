@@ -1,30 +1,53 @@
-<header class="nav">
+<header class="nav" [class.open]="menuOpen()">
   <div class="nav-inner">
-    <a class="brand" routerLink="/">
-      <span class="logo">▦</span>
+    <a class="brand" routerLink="/" (click)="menuOpen.set(false)">
+      <span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       <span>Cowork<b>Space</b></span>
     </a>
 
-    <nav class="links">
-      @if (auth.isLoggedIn()) {
-        <a routerLink="/spaces" routerLinkActive="active">Espaces</a>
-        <a routerLink="/my-reservations" routerLinkActive="active">Mes réservations</a>
+    @if (auth.isLoggedIn()) {
+      <nav class="links" aria-label="Navigation principale">
+        <a routerLink="/spaces" routerLinkActive="active" (click)="menuOpen.set(false)">
+          <app-icon name="building" [size]="17" /> Espaces
+        </a>
+        <a routerLink="/my-reservations" routerLinkActive="active" (click)="menuOpen.set(false)">
+          <app-icon name="ticket" [size]="17" /> Mes réservations
+        </a>
         @if (auth.isAdmin()) {
-          <a routerLink="/admin" routerLinkActive="active" class="admin-link">⚙ Administration</a>
+          <a routerLink="/admin" routerLinkActive="active" class="admin-link" (click)="menuOpen.set(false)">
+            <app-icon name="shield" [size]="17" /> Administration
+          </a>
         }
-      }
-    </nav>
+      </nav>
+    } @else {
+      <span class="spacer"></span>
+    }
 
     <div class="right-side">
+      <button class="icon-btn" (click)="theme.toggle()" [attr.aria-label]="theme.theme() === 'dark' ? 'Passer en thème clair' : 'Passer en thème sombre'">
+        <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="18" />
+      </button>
+
       @if (auth.currentUser(); as u) {
-        <span class="who">
-          {{ u.fullName }}
-          @if (auth.isAdmin()) { <em class="role">ADMIN</em> }
-        </span>
-        <button class="btn btn-outline btn-sm out" (click)="auth.logout()">Déconnexion</button>
+        <div class="who">
+          <app-avatar [name]="u.fullName" size="sm" />
+          <div class="who-text">
+            <span class="who-name">{{ u.fullName }}</span>
+            <span class="who-role">{{ auth.isAdmin() ? 'Administrateur' : 'Membre' }}</span>
+          </div>
+        </div>
+        <button class="icon-btn" (click)="auth.logout()" aria-label="Déconnexion" title="Déconnexion">
+          <app-icon name="logout" [size]="18" />
+        </button>
       } @else {
-        <a class="btn btn-outline btn-sm out" routerLink="/login">Connexion</a>
-        <a class="btn btn-accent btn-sm" routerLink="/register">Inscription</a>
+        <a class="btn btn-ghost btn-sm" routerLink="/login">Connexion</a>
+        <a class="btn btn-primary btn-sm" routerLink="/register">Inscription</a>
+      }
+
+      @if (auth.isLoggedIn()) {
+        <button class="icon-btn burger" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()" aria-label="Menu">
+          <app-icon [name]="menuOpen() ? 'x' : 'menu'" [size]="20" />
+        </button>
       }
     </div>
   </div>

@@ -1,5 +1,14 @@
-.booking-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1.25rem; align-items: start; }
+.counters { display: flex; gap: .5rem; flex-wrap: wrap; }
+.counter {
+  display: inline-flex; align-items: center; gap: .45rem; height: 38px; padding: 0 .9rem; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--border); font-size: .85rem; color: var(--text-2); font-weight: 600;
+}
+.counter b { color: var(--text); font-weight: 800; }
+.counter.mine { background: var(--primary-soft); border-color: transparent; color: var(--primary-ink); }
+.c-dot { width: 10px; height: 10px; border-radius: 3px; }
 
-@media (max-width: 960px) {
-  .booking-layout { grid-template-columns: 1fr; }
+.step { display: flex; align-items: center; gap: .55rem; font-weight: 750; font-size: .95rem; color: var(--text); margin-bottom: 1rem; }
+.step span {
+  width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center;
+  background: var(--text); color: var(--bg); font-size: .78rem; font-weight: 800;
 }

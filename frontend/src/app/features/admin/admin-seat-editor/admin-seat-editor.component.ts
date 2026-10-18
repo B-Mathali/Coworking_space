@@ -3,9 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SeatAvailability, Slot, Space } from '../../../core/models/space.model';
 import { AdminService } from '../../../core/services/admin.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
 import { SeatService } from '../../../core/services/seat.service';
 import { SpaceService } from '../../../core/services/space.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { AvatarComponent } from '../../../shared/avatar/avatar.component';
+import { IconComponent } from '../../../shared/icon/icon.component';
 import { TimeSlotPickerComponent } from '../../reservations/time-slot-picker/time-slot-picker.component';
 
 const SEAT_SIZE = 56;
@@ -29,8 +32,22 @@ interface DragState {
 @Component({
   selector: 'app-admin-seat-editor',
   standalone: true,
-  imports: [FormsModule, TimeSlotPickerComponent],
+  imports: [FormsModule, TimeSlotPickerComponent, IconComponent, AvatarComponent],
   templateUrl: './admin-seat-editor.component.html',
+  styles: [
+    `
+      .toolbar { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+      .bulk { display: flex; align-items: center; gap: .4rem; }
+      .bulk input { width: 62px; height: 32px; text-align: center; padding: 0 .3rem; }
+      .legend app-icon { vertical-align: -2px; }
+      .sel-head { display: flex; align-items: center; gap: .8rem; margin-bottom: 1.1rem; }
+      .sel-head h3 { margin-bottom: .25rem !important; }
+      .sel-big { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; font-weight: 800; flex-shrink: 0; }
+      .reserved { display: flex; align-items: center; gap: .7rem; padding: .7rem .8rem; border-radius: var(--r); background: var(--bg-elev); border: 1px solid var(--border); margin-bottom: .6rem; }
+      .del { color: var(--danger); }
+      .del:hover:not(:disabled) { background: var(--danger-soft); color: var(--danger); }
+    `,
+  ],
 })
 export class AdminSeatEditorComponent implements OnInit {
   private readonly spacesApi = inject(SpaceService);
@@ -39,6 +56,7 @@ export class AdminSeatEditorComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly confirm = inject(ConfirmService);
 
   /** Paramètre optionnel de route :spaceId */
   readonly spaceId = input<string>();
@@ -191,9 +209,16 @@ export class AdminSeatEditorComponent implements OnInit {
     });
   }
 
-  removeSeat() {
+  async removeSeat() {
     const seat = this.selected();
-    if (!seat || !confirm(`Supprimer la place ${seat.label} et ses réservations ?`)) return;
+    if (!seat) return;
+    const ok = await this.confirm.ask({
+      title: `Supprimer la place ${seat.label} ?`,
+      message: 'Ses réservations seront également supprimées.',
+      confirmText: 'Supprimer',
+      danger: true,
+    });
+    if (!ok) return;
     this.seatsApi.remove(seat.id).subscribe({
       next: () => {
         this.selectedId.set(null);
@@ -204,9 +229,17 @@ export class AdminSeatEditorComponent implements OnInit {
     });
   }
 
-  cancelReservation() {
+  async cancelReservation() {
     const seat = this.selected();
-    if (!seat?.reservationId || !confirm(`Annuler la réservation de ${seat.reservedBy} ?`)) return;
+    if (!seat?.reservationId) return;
+    const ok = await this.confirm.ask({
+      title: 'Annuler cette réservation ?',
+      message: `Réservation de ${seat.reservedBy} sur la place ${seat.label}.`,
+      confirmText: 'Oui, annuler',
+      cancelText: 'Garder',
+      danger: true,
+    });
+    if (!ok) return;
     this.adminApi.cancelReservation(seat.reservationId).subscribe({
       next: () => {
         this.toast.success('Réservation annulée.');

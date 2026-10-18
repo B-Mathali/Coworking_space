@@ -1,16 +1,55 @@
-.nav { background: var(--navy); color: #fff; position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow); }
-.nav-inner { max-width: 1200px; margin: 0 auto; padding: .7rem 1.25rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
-.brand { color: #fff; font-size: 1.2rem; font-weight: 500; display: flex; align-items: center; gap: .5rem; text-decoration: none !important; }
-.brand b { color: var(--orange); }
-.logo { background: var(--blue); width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; }
-.links { display: flex; gap: .25rem; flex: 1; flex-wrap: wrap; }
-.links a { color: #cbd5e1; padding: .4rem .8rem; border-radius: 8px; font-weight: 600; font-size: .92rem; text-decoration: none !important; }
-.links a:hover { background: var(--navy-2); color: #fff; }
-.links a.active { background: var(--blue); color: #fff; }
-.links a.admin-link { color: #fdba74; }
-.links a.admin-link.active { background: var(--orange); color: #fff; }
-.right-side { display: flex; align-items: center; gap: .6rem; }
-.who { font-size: .9rem; color: #e2e8f0; }
-.role { font-style: normal; background: var(--orange); color: #fff; font-size: .65rem; font-weight: 800; padding: .1rem .4rem; border-radius: 6px; margin-left: .3rem; }
-.out { background: transparent; color: #e2e8f0; border-color: #475569; }
-.out:hover { background: var(--navy-2) !important; }
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: saturate(1.6) blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner { max-width: 1240px; height: var(--nav-h); margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; gap: 2rem; }
+
+.brand { display: flex; align-items: center; gap: .6rem; color: var(--text); font-size: 1.12rem; font-weight: 650; letter-spacing: -.02em; text-decoration: none !important; }
+.brand:hover { color: var(--text); }
+.brand b { font-weight: 800; }
+.logo { width: 32px; height: 32px; border-radius: 10px; background: var(--primary); padding: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 35%, transparent); }
+.logo i { border-radius: 3px; background: #fff; }
+.logo i:nth-child(2), .logo i:nth-child(3) { opacity: .5; }
+.logo i:nth-child(4) { background: var(--accent); }
+
+.links { display: flex; gap: .2rem; flex: 1; }
+.links a {
+  display: inline-flex; align-items: center; gap: .45rem; height: 38px; padding: 0 .85rem; border-radius: 10px;
+  color: var(--text-2); font-weight: 650; font-size: .9rem; text-decoration: none !important; transition: background .15s, color .15s;
+}
+.links a:hover { background: var(--surface-2); color: var(--text); }
+.links a.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--border); }
+.links a.active app-icon { color: var(--primary); }
+.links a.admin-link.active app-icon { color: var(--accent); }
+
+.right-side { display: flex; align-items: center; gap: .5rem; }
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 10px; border: 1px solid transparent; background: transparent; color: var(--text-2);
+  display: grid; place-items: center; cursor: pointer; transition: background .15s, color .15s;
+}
+.icon-btn:hover { background: var(--surface-2); color: var(--text); }
+
+.who { display: flex; align-items: center; gap: .6rem; padding: .25rem .75rem .25rem .3rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); }
+.who-text { display: flex; flex-direction: column; line-height: 1.15; }
+.who-name { font-size: .84rem; font-weight: 700; color: var(--text); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.who-role { font-size: .7rem; color: var(--text-3); font-weight: 600; }
+
+.burger { display: none; }
+
+@media (max-width: 880px) {
+  .nav-inner { padding: 0 1rem; gap: 1rem; }
+  .who-text { display: none; }
+  .who { padding: .2rem; border-radius: 50%; }
+  .burger { display: grid; }
+  .links {
+    position: absolute; top: var(--nav-h); left: 0; right: 0; flex-direction: column; gap: .25rem;
+    padding: .75rem 1rem 1rem; background: var(--bg); border-bottom: 1px solid var(--border); box-shadow: var(--shadow);
+    display: none;
+  }
+  .nav.open .links { display: flex; animation: rise .2s var(--ease); }
+  .links a { height: 46px; }
+  .spacer { display: none; }
+  .right-side { margin-left: auto; }
+}

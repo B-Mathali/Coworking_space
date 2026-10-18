@@ -1,72 +1,84 @@
 import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import { SeatAvailability, Slot } from '../../../core/models/space.model';
+import { IconComponent } from '../../../shared/icon/icon.component';
 
 /** Panneau d'informations affiché au clic sur une place, avant confirmation. */
 @Component({
   selector: 'app-seat-info-panel',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, IconComponent],
   template: `
     <div class="card panel">
       @if (seat(); as s) {
-        <div class="row">
-          <div class="big-label" [class]="'big-label seat-' + s.status.toLowerCase()">{{ s.label }}</div>
-          <div>
-            <h3 style="margin: 0">Place {{ s.label }}</h3>
-            <span class="muted small">{{ spaceName() }}</span>
+        <div class="head">
+          <div [class]="'big seat-' + s.status.toLowerCase()">{{ s.label }}</div>
+          <div class="head-text">
+            <span class="xs muted">Place sélectionnée</span>
+            <h3>Place {{ s.label }}</h3>
+            <span class="muted small truncate">{{ spaceName() }}</span>
           </div>
+          <button class="btn btn-ghost btn-sm btn-icon" (click)="closed.emit()" aria-label="Fermer"><app-icon name="x" [size]="16" /></button>
         </div>
 
         @if (slot(); as sl) {
-          <dl>
-            <dt>Date</dt>
-            <dd>{{ sl.start | date: 'EEEE d MMMM y' }}</dd>
-            <dt>Créneau</dt>
-            <dd>{{ sl.start | date: 'HH:mm' }} → {{ sl.end | date: 'HH:mm' }}</dd>
-          </dl>
+          <div class="ticket">
+            <div class="t-row">
+              <app-icon name="calendar" [size]="16" />
+              <div><span class="t-k">Date</span><span class="t-v">{{ sl.start | date: 'EEEE d MMMM y' }}</span></div>
+            </div>
+            <div class="t-row">
+              <app-icon name="clock" [size]="16" />
+              <div><span class="t-k">Créneau</span><span class="t-v tabular">{{ sl.start | date: 'HH:mm' }} → {{ sl.end | date: 'HH:mm' }}</span></div>
+            </div>
+          </div>
         }
 
         @switch (s.status) {
           @case ('AVAILABLE') {
-            <div class="alert alert-info">Cette place est libre sur ce créneau.</div>
             @if (inPast()) {
-              <div class="alert alert-warn">Ce créneau est déjà commencé : choisissez une heure ultérieure.</div>
+              <div class="alert alert-warn"><app-icon name="alert" [size]="16" /> <span>Ce créneau a déjà commencé : choisissez une heure ultérieure.</span></div>
+            } @else {
+              <div class="alert alert-success"><app-icon name="check-circle" [size]="16" /> <span>Cette place est libre sur ce créneau.</span></div>
             }
-            <button class="btn btn-accent btn-block" [disabled]="busy() || inPast()" (click)="reserve.emit()">
-              {{ busy() ? 'Réservation…' : 'Confirmer la réservation' }}
+            <button class="btn btn-accent btn-lg btn-block" [disabled]="busy() || inPast()" (click)="reserve.emit()">
+              @if (busy()) { Réservation… } @else { <app-icon name="check" [size]="18" [stroke]="2.5" /> Confirmer la réservation }
             </button>
           }
           @case ('MINE') {
-            <div class="alert alert-info">✔ Vous avez réservé cette place sur ce créneau.</div>
-            <button class="btn btn-danger btn-block" [disabled]="busy()" (click)="cancelMine.emit()">
-              Annuler ma réservation
+            <div class="alert alert-info"><app-icon name="check-circle" [size]="16" /> <span>Vous avez réservé cette place sur ce créneau.</span></div>
+            <button class="btn btn-danger-soft btn-block" [disabled]="busy()" (click)="cancelMine.emit()">
+              <app-icon name="x" [size]="16" /> Annuler ma réservation
             </button>
           }
           @case ('TAKEN') {
-            <div class="alert alert-error">Cette place est déjà occupée sur ce créneau.</div>
+            <div class="alert alert-error"><app-icon name="user" [size]="16" /> <span>Cette place est déjà occupée sur ce créneau. Essayez une autre place ou un autre horaire.</span></div>
           }
           @case ('DISABLED') {
-            <div class="alert alert-warn">Place indisponible (maintenance).</div>
+            <div class="alert alert-warn"><app-icon name="wrench" [size]="16" /> <span>Place indisponible (maintenance).</span></div>
           }
         }
-
-        <button class="btn btn-ghost btn-block" style="margin-top: .5rem" (click)="closed.emit()">Fermer</button>
       } @else {
-        <div class="empty">
-          <div style="font-size: 2rem">👆</div>
-          <p>Cliquez sur une place du plan pour voir ses informations et la réserver.</p>
+        <div class="empty-state" style="padding: 2rem .5rem">
+          <div class="empty-icon"><app-icon name="pointer" [size]="24" /></div>
+          <h3>Choisissez une place</h3>
+          <p>Cliquez sur une place <b style="color: var(--success)">libre</b> du plan pour voir ses informations et la réserver.</p>
         </div>
       }
     </div>
   `,
   styles: [
     `
-      .panel { position: sticky; top: 76px; }
-      .big-label { width: 52px; height: 52px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; border: 2px solid; }
-      dl { display: grid; grid-template-columns: auto 1fr; gap: .25rem 1rem; margin: 1rem 0; font-size: .92rem; }
-      dt { color: var(--gray-500); font-weight: 600; }
-      dd { margin: 0; text-transform: capitalize; }
+      .head { display: flex; align-items: center; gap: .85rem; margin-bottom: 1.1rem; }
+      .head-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+      .head-text h3 { margin: 0; font-size: 1.15rem; }
+      .big { width: 58px; height: 58px; border-radius: 15px; display: grid; place-items: center; font-weight: 800; font-size: 1rem; flex-shrink: 0; }
+      .ticket { border: 1px dashed var(--border-strong); border-radius: var(--r); padding: .4rem .9rem; margin-bottom: 1rem; background: var(--bg-elev); }
+      .t-row { display: flex; align-items: center; gap: .75rem; padding: .55rem 0; color: var(--text-3); }
+      .t-row + .t-row { border-top: 1px dashed var(--border); }
+      .t-row div { display: flex; flex-direction: column; line-height: 1.3; }
+      .t-k { font-size: .72rem; font-weight: 650; text-transform: uppercase; letter-spacing: .05em; }
+      .t-v { font-weight: 700; color: var(--text); text-transform: capitalize; }
     `,
   ],
 })

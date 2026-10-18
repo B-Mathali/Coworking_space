@@ -1,21 +1,66 @@
-<div class="container" style="max-width: 760px">
-  <a routerLink="/spaces" class="back-link">← Retour aux espaces</a>
+<div class="container container-narrow">
+  <a routerLink="/spaces" class="back-link"><app-icon name="arrow-left" [size]="16" /> Tous les espaces</a>
 
   @if (loading()) {
     <app-loading-spinner />
   } @else {
     @if (space(); as s) {
-      <div class="card">
-        <div class="row">
-          <h1 style="margin: 0">{{ s.name }}</h1>
-          @if (!s.isActive) { <span class="badge badge-gray">Fermé</span> }
+      <article class="card card-flush rise">
+        <div class="hero">
+          <div class="hero-grid">
+            @for (i of heroCells; track $index) { <span [class.on]="i < (s.seatCount ?? 0)"></span> }
+          </div>
         </div>
-        @if (s.location) { <p class="muted">📍 {{ s.location }}</p> }
-        <p>{{ s.description || 'Aucune description.' }}</p>
-        <a class="btn btn-primary" [routerLink]="['/spaces', s.id, 'book']">Voir le plan et réserver</a>
-      </div>
+
+        <div class="content">
+          <div class="row">
+            <h1 class="mb-0">{{ s.name }}</h1>
+            @if (s.isActive) {
+              <span class="badge badge-green badge-dot">Ouvert</span>
+            } @else {
+              <span class="badge badge-gray badge-dot">Fermé</span>
+            }
+          </div>
+          @if (s.location) {
+            <p class="loc"><app-icon name="pin" [size]="16" /> {{ s.location }}</p>
+          }
+
+          <div class="facts">
+            <div class="fact">
+              <span class="fi"><app-icon name="seat" [size]="18" /></span>
+              <div><b>{{ s.seatCount ?? 0 }}</b><span>places</span></div>
+            </div>
+            <div class="fact">
+              <span class="fi"><app-icon name="expand" [size]="18" /></span>
+              <div><b>{{ s.planWidth }}×{{ s.planHeight }}</b><span>taille du plan</span></div>
+            </div>
+            <div class="fact">
+              <span class="fi"><app-icon name="clock" [size]="18" /></span>
+              <div><b>Flexible</b><span>à l'heure ou à la journée</span></div>
+            </div>
+          </div>
+
+          <h3>À propos de cet espace</h3>
+          <p class="text-2">{{ s.description || 'Aucune description pour le moment.' }}</p>
+
+          <div class="cta">
+            <div>
+              <b>Prêt à travailler ?</b>
+              <p class="muted small mb-0">Choisissez un créneau puis votre place sur le plan interactif.</p>
+            </div>
+            <a class="btn btn-primary btn-lg" [routerLink]="['/spaces', s.id, 'book']">
+              Voir le plan et réserver <app-icon name="arrow-right" [size]="17" />
+            </a>
+          </div>
+        </div>
+      </article>
     } @else {
-      <div class="card empty">Espace introuvable.</div>
+      <div class="card empty-state">
+        <div class="empty-icon"><app-icon name="building" [size]="26" /></div>
+        <h3>Espace introuvable</h3>
+        <p>Cet espace n'existe pas ou a été supprimé.</p>
+        <a class="btn btn-outline btn-sm" routerLink="/spaces">Retour aux espaces</a>
+      </div>
     }
   }
 </div>

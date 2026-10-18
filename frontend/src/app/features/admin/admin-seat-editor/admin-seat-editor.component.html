@@ -1,50 +1,69 @@
 <div class="container">
   <div class="page-head">
     <div>
+      <span class="eyebrow"><app-icon name="grid" [size]="14" /> Éditeur</span>
       <h1>Plan des places</h1>
-      <p class="muted" style="margin: 0">Dessinez la salle : ajoutez, déplacez et gérez chaque place.</p>
+      <p class="lead">Dessinez la salle : ajoutez, déplacez et gérez chaque place.</p>
     </div>
-    <div class="form-group" style="margin: 0; min-width: 240px">
-      <label for="space-sel">Espace</label>
-      <select id="space-sel" [ngModel]="currentId()" (ngModelChange)="onSpaceChange($event)">
-        @for (s of spaces(); track s.id) {
-          <option [ngValue]="s.id">{{ s.name }}</option>
-        }
-      </select>
-    </div>
+    @if (spaces().length > 0) {
+      <div class="form-group mb-0" style="min-width: 250px">
+        <label for="space-sel">Espace</label>
+        <select id="space-sel" [ngModel]="currentId()" (ngModelChange)="onSpaceChange($event)">
+          @for (s of spaces(); track s.id) {
+            <option [ngValue]="s.id">{{ s.name }}</option>
+          }
+        </select>
+      </div>
+    }
   </div>
 
   @if (spaces().length === 0) {
-    <div class="card empty">Créez d'abord un espace dans « Espaces ».</div>
+    <div class="card empty-state">
+      <div class="empty-icon"><app-icon name="building" [size]="26" /></div>
+      <h3>Aucun espace</h3>
+      <p>Créez d'abord un espace dans « Espaces », puis revenez dessiner son plan.</p>
+    </div>
   } @else {
    @if (space(); as sp) {
-    <div class="editor-layout">
+    <div class="split-layout">
       <section>
         <div class="card">
-          <p class="muted small" style="margin-bottom: .5rem">
-            Créneau affiché : permet de voir quelles places sont réservées et par qui.
-          </p>
+          <div class="row" style="margin-bottom: .85rem">
+            <app-icon name="eye" [size]="16" class="muted" />
+            <span class="small text-2">Créneau affiché — permet de voir quelles places sont réservées et par qui.</span>
+          </div>
           <app-time-slot-picker (slotChange)="onSlot($event)" />
         </div>
 
         <div class="card">
-          <div class="row" style="margin-bottom: .75rem">
-            <button class="btn btn-sm" [class.btn-accent]="adding()" [class.btn-outline]="!adding()" (click)="adding.set(!adding())">
-              {{ adding() ? '✔ Mode ajout actif (cliquez sur le plan)' : '+ Ajouter des places' }}
-            </button>
+          <div class="toolbar">
+            <div class="segmented">
+              <button [class.active]="!adding()" (click)="adding.set(false)"><app-icon name="move" [size]="15" /> Sélection</button>
+              <button [class.active]="adding()" (click)="adding.set(true)"><app-icon name="plus" [size]="15" /> Ajouter</button>
+            </div>
             <span class="spacer"></span>
-            <span class="muted small">Grille :</span>
-            <input type="number" min="1" max="26" style="width: 64px" [(ngModel)]="bulkRows" aria-label="Rangées" />
-            <span class="muted small">×</span>
-            <input type="number" min="1" max="30" style="width: 64px" [(ngModel)]="bulkCols" aria-label="Colonnes" />
-            <button class="btn btn-outline btn-sm" (click)="bulkGenerate()">Générer</button>
+            <div class="bulk">
+              <span class="muted small">Grille</span>
+              <input type="number" min="1" max="26" [(ngModel)]="bulkRows" aria-label="Rangées" />
+              <span class="muted">×</span>
+              <input type="number" min="1" max="30" [(ngModel)]="bulkCols" aria-label="Colonnes" />
+              <button class="btn btn-outline btn-sm" (click)="bulkGenerate()"><app-icon name="sparkles" [size]="14" /> Générer</button>
+            </div>
           </div>
 
-          <div class="legend">
+          @if (adding()) {
+            <div class="alert alert-warn" style="margin-bottom: .85rem">
+              <app-icon name="pointer" [size]="16" />
+              <span>Mode ajout actif : cliquez sur une zone vide du plan pour créer une place.</span>
+            </div>
+          }
+
+          <div class="legend" style="margin-bottom: .75rem">
             <span><i class="dot-available"></i>Libre</span>
             <span><i class="dot-taken"></i>Réservée</span>
             <span><i class="dot-disabled"></i>Désactivée</span>
-            <span class="muted">Glissez une place pour la déplacer.</span>
+            <span class="spacer"></span>
+            <span class="muted"><app-icon name="move" [size]="13" /> Glissez une place pour la déplacer</span>
           </div>
 
           <div class="plan-scroll">
@@ -73,44 +92,62 @@
               }
             </div>
           </div>
+          <div class="row mt-sm">
+            <span class="muted xs">{{ seats().length }} place(s) · plan {{ sp.planWidth }} × {{ sp.planHeight }} px</span>
+          </div>
           @if (seats().length === 0) {
-            <p class="muted small mt">Aucune place : activez « Ajouter des places » ou générez une grille.</p>
+            <p class="muted small mt">Aucune place : passez en mode « Ajouter » ou générez une grille.</p>
           }
         </div>
       </section>
 
-      <aside>
-        <div class="card panel">
+      <aside class="panel">
+        <div class="card">
           @if (selected(); as s) {
-            <h3>Place {{ s.label }}</h3>
+            <div class="sel-head">
+              <div [class]="'sel-big seat-' + (!s.isActive ? 'disabled' : s.status === 'AVAILABLE' ? 'available' : 'taken')">{{ s.label }}</div>
+              <div style="flex: 1; min-width: 0">
+                <h3 class="mb-0">Place {{ s.label }}</h3>
+                @if (!s.isActive) { <span class="badge badge-gray">Désactivée</span> }
+                @else if (s.status === 'AVAILABLE') { <span class="badge badge-green badge-dot">Libre sur ce créneau</span> }
+                @else { <span class="badge badge-red badge-dot">Réservée sur ce créneau</span> }
+              </div>
+              <button class="btn btn-ghost btn-sm btn-icon" (click)="selectedId.set(null)" aria-label="Fermer"><app-icon name="x" [size]="16" /></button>
+            </div>
+
             <div class="form-group">
               <label for="seat-label">Nom affiché</label>
-              <div class="row" style="flex-wrap: nowrap">
-                <input id="seat-label" [ngModel]="renameValue()" (ngModelChange)="renameValue.set($event)" maxlength="10" />
-                <button class="btn btn-outline btn-sm" (click)="rename()">OK</button>
+              <div class="row row-nowrap" style="gap: .4rem">
+                <input id="seat-label" [ngModel]="renameValue()" (ngModelChange)="renameValue.set($event)" (keydown.enter)="rename()" maxlength="10" />
+                <button class="btn btn-outline btn-icon" (click)="rename()" aria-label="Renommer" title="Renommer"><app-icon name="check" [size]="16" /></button>
               </div>
             </div>
 
-            <p class="small">
-              État :
-              @if (!s.isActive) { <span class="badge badge-gray">Désactivée</span> }
-              @else if (s.status === 'AVAILABLE') { <span class="badge badge-green">Libre sur ce créneau</span> }
-              @else { <span class="badge badge-red">Réservée sur ce créneau</span> }
-            </p>
-
             @if (s.reservedBy) {
-              <div class="alert alert-info">
-                Réservée par <b>{{ s.reservedBy }}</b>
+              <div class="reserved">
+                <app-avatar [name]="s.reservedBy" size="sm" />
+                <div style="flex: 1; min-width: 0">
+                  <span class="muted xs">Réservée par</span>
+                  <div class="strong truncate">{{ s.reservedBy }}</div>
+                </div>
               </div>
-              <button class="btn btn-danger btn-block" (click)="cancelReservation()">Annuler cette réservation</button>
+              <button class="btn btn-danger-soft btn-block" (click)="cancelReservation()"><app-icon name="x" [size]="15" /> Annuler cette réservation</button>
+              <hr class="divider" />
             }
 
-            <button class="btn btn-outline btn-block" style="margin-top: .5rem" (click)="toggleActive()">
-              {{ s.isActive ? 'Désactiver (maintenance)' : 'Réactiver la place' }}
-            </button>
-            <button class="btn btn-danger btn-block" style="margin-top: .5rem" (click)="removeSeat()">Supprimer la place</button>
+            <div class="stack" style="gap: .5rem">
+              <button class="btn btn-outline btn-block" (click)="toggleActive()">
+                <app-icon [name]="s.isActive ? 'wrench' : 'check-circle'" [size]="15" />
+                {{ s.isActive ? 'Désactiver (maintenance)' : 'Réactiver la place' }}
+              </button>
+              <button class="btn btn-ghost btn-block del" (click)="removeSeat()"><app-icon name="trash" [size]="15" /> Supprimer la place</button>
+            </div>
           } @else {
-            <div class="empty">Cliquez sur une place pour la gérer.</div>
+            <div class="empty-state" style="padding: 2rem .5rem">
+              <div class="empty-icon"><app-icon name="pointer" [size]="24" /></div>
+              <h3>Aucune sélection</h3>
+              <p>Cliquez sur une place pour la renommer, la désactiver ou la supprimer.</p>
+            </div>
           }
         </div>
       </aside>

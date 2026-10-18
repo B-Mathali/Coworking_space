@@ -9,6 +9,8 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { IconComponent } from '../../../shared/icon/icon.component';
+import { AuthShellComponent } from '../auth-shell/auth-shell.component';
 
 function samePassword(group: AbstractControl): ValidationErrors | null {
   return group.get('password')?.value === group.get('confirm')?.value ? null : { mismatch: true };
@@ -17,7 +19,7 @@ function samePassword(group: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, AuthShellComponent, IconComponent],
   templateUrl: './register.component.html',
 })
 export class RegisterComponent {
@@ -28,6 +30,7 @@ export class RegisterComponent {
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly showPwd = signal(false);
 
   readonly form = this.fb.nonNullable.group(
     {

@@ -1,56 +1,93 @@
 <div class="container">
   <div class="page-head">
     <div>
+      <span class="eyebrow"><app-icon name="dashboard" [size]="14" /> {{ today | date: 'EEEE d MMMM' }}</span>
       <h1>Tableau de bord</h1>
-      <p class="muted" style="margin: 0">Vue d'ensemble de l'application.</p>
+      <p class="lead">Vue d'ensemble de l'activité du coworking.</p>
     </div>
     <div class="row">
-      <a class="btn btn-outline" routerLink="../seats">Gérer les places</a>
-      <a class="btn btn-primary" routerLink="../reservations">Voir les réservations</a>
+      <a class="btn btn-outline" routerLink="../seats"><app-icon name="grid" [size]="17" /> Gérer les places</a>
+      <a class="btn btn-primary" routerLink="../reservations"><app-icon name="calendar" [size]="17" /> Voir les réservations</a>
     </div>
   </div>
 
   @if (stats(); as s) {
     <div class="grid grid-stats">
-      <div class="card stat-card">
+      <div class="card stat rise">
+        <div class="stat-top"><span class="stat-label">Utilisateurs</span><span class="stat-icon"><app-icon name="users" [size]="19" /></span></div>
         <div class="stat-value">{{ s.totalUsers }}</div>
-        <div class="stat-label">Utilisateurs</div>
+        <span class="muted xs">comptes enregistrés</span>
       </div>
-      <div class="card stat-card navy">
+      <div class="card stat rise" style="animation-delay: 50ms">
+        <div class="stat-top"><span class="stat-label">Espaces</span><span class="stat-icon gray"><app-icon name="building" [size]="19" /></span></div>
         <div class="stat-value">{{ s.totalSpaces }}</div>
-        <div class="stat-label">Espaces</div>
+        <span class="muted xs">salles configurées</span>
       </div>
-      <div class="card stat-card navy">
-        <div class="stat-value">{{ s.activeSeats }}<span class="muted small"> / {{ s.totalSeats }}</span></div>
-        <div class="stat-label">Places actives</div>
+      <div class="card stat rise" style="animation-delay: 100ms">
+        <div class="stat-top"><span class="stat-label">Places actives</span><span class="stat-icon gray"><app-icon name="seat" [size]="19" /></span></div>
+        <div class="stat-value">{{ s.activeSeats }}<small> / {{ s.totalSeats }}</small></div>
+        <span class="muted xs">{{ s.totalSeats - s.activeSeats }} en maintenance</span>
       </div>
-      <div class="card stat-card orange">
+      <div class="card stat rise" style="animation-delay: 150ms">
+        <div class="stat-top"><span class="stat-label">Aujourd'hui</span><span class="stat-icon orange"><app-icon name="calendar-check" [size]="19" /></span></div>
         <div class="stat-value">{{ s.reservationsToday }}</div>
-        <div class="stat-label">Réservations aujourd'hui</div>
+        <span class="muted xs">réservations du jour</span>
       </div>
-      <div class="card stat-card green">
+      <div class="card stat rise" style="animation-delay: 200ms">
+        <div class="stat-top"><span class="stat-label">À venir</span><span class="stat-icon green"><app-icon name="trending" [size]="19" /></span></div>
         <div class="stat-value">{{ s.upcomingReservations }}</div>
-        <div class="stat-label">Réservations à venir</div>
-      </div>
-      <div class="card stat-card green">
-        <div class="stat-value">{{ s.occupancyRate }}%</div>
-        <div class="stat-label">Occupation en ce moment ({{ s.currentlyOccupied }} places)</div>
+        <span class="muted xs">réservations planifiées</span>
       </div>
     </div>
 
-    <div class="card mt">
-      <h2>Réservations des 7 derniers jours</h2>
-      <div class="chart">
-        @for (d of s.last7Days; track d.date) {
-          <div class="bar-col">
-            <span class="bar-value">{{ d.count }}</span>
-            <div class="bar" [style.height.%]="height(d.count)"></div>
-            <span class="bar-label">{{ d.date | date: 'EEE d' }}</span>
+    <div class="dash-grid mt">
+      <div class="card occ">
+        <div class="card-head"><h2>Occupation en direct</h2><span class="spacer"></span><span class="badge badge-green badge-dot">Live</span></div>
+        <div class="ring-wrap">
+          <svg viewBox="0 0 120 120" class="ring" role="img" [attr.aria-label]="'Occupation : ' + s.occupancyRate + ' %'">
+            <circle cx="60" cy="60" r="50" class="ring-track" />
+            <circle cx="60" cy="60" r="50" class="ring-value" [attr.stroke-dasharray]="ringDash(s.occupancyRate)" [style.opacity]="s.occupancyRate > 0 ? 1 : 0" />
+          </svg>
+          <div class="ring-label">
+            <b class="tabular">{{ s.occupancyRate }}%</b>
+            <span>occupé</span>
           </div>
-        }
+        </div>
+        <div class="occ-foot">
+          <div><b class="tabular">{{ s.currentlyOccupied }}</b><span>places occupées</span></div>
+          <div><b class="tabular">{{ s.activeSeats - s.currentlyOccupied }}</b><span>places libres</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Réservations des 7 derniers jours</h2>
+            <span class="muted small">{{ weekTotal() }} réservations au total</span>
+          </div>
+        </div>
+        <div class="chart" role="img" aria-label="Histogramme des réservations sur 7 jours">
+          <div class="gridlines" aria-hidden="true">
+            @for (g of gridSteps(); track g) { <div class="gl"><span>{{ g }}</span></div> }
+          </div>
+          <div class="bars">
+            @for (d of s.last7Days; track d.date; let last = $last) {
+              <div class="bar-col" tabindex="0" [attr.aria-label]="(d.date | date: 'EEEE d') + ' : ' + d.count + ' réservations'">
+                <div class="bar-area">
+                  <div class="tip">{{ d.count }} rés.<small>{{ d.date | date: 'EEE d MMM' }}</small></div>
+                  <div class="bar" [class.today]="last" [style.height.%]="height(d.count)"></div>
+                </div>
+                <span class="bar-label" [class.strong]="last">{{ d.date | date: 'EEE d' }}</span>
+              </div>
+            }
+          </div>
+        </div>
       </div>
     </div>
   } @else {
-    <app-loading-spinner />
+    <div class="grid grid-stats">
+      @for (i of [1, 2, 3, 4, 5]; track i) { <div class="skeleton" style="height: 128px; border-radius: var(--r-lg)"></div> }
+    </div>
+    <div class="skeleton mt" style="height: 300px; border-radius: var(--r-lg)"></div>
   }
 </div>
