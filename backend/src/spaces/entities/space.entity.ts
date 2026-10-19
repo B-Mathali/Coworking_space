@@ -15,6 +15,9 @@ export class Space {
   @Column({ type: 'varchar', nullable: true })
   location: string | null;
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+imageUrl: string | null;
+
   /** Dimensions (en px) du plan dessiné par l'admin */
   @Column({ type: 'int', default: 800 })
   planWidth: number;

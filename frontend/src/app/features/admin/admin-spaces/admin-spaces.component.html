@@ -1,57 +1,161 @@
+<style>
+  .space-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    line-height: 1;
+    text-decoration: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .icon-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .icon-btn span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (max-width: 768px) {
+    .space-actions {
+      gap: 4px;
+    }
+
+    .icon-btn {
+      width: 29px;
+      height: 29px;
+      min-width: 29px;
+    }
+  }
+</style>
+
 <div class="container">
   <div class="page-head">
     <div>
-      <span class="eyebrow"><app-icon name="building" [size]="14" /> Gestion</span>
       <h1>Espaces</h1>
-      <p class="lead">Créez les salles, puis dessinez leur plan de places.</p>
+      <p class="muted" style="margin: 0">
+        Créez les salles, puis dessinez leur plan de places.
+      </p>
     </div>
-    <button class="btn btn-primary" (click)="openNew()"><app-icon name="plus" [size]="17" /> Nouvelle espace</button>
+
+    <button class="btn btn-primary" (click)="openNew()">
+      + Nouvel espace
+    </button>
   </div>
 
   @if (loading()) {
-    <div class="skeleton" style="height: 260px; border-radius: var(--r-lg)"></div>
+    <app-loading-spinner />
   } @else if (spaces().length === 0) {
-    <div class="card empty-state">
-      <div class="empty-icon"><app-icon name="building" [size]="26" /></div>
-      <h3>Aucun espace</h3>
-      <p>Créez votre premier espace pour commencer à configurer le plan des places.</p>
-      <button class="btn btn-primary btn-sm" (click)="openNew()"><app-icon name="plus" [size]="15" /> Créer un espace</button>
+    <div class="card empty">
+      Aucun espace. Créez le premier pour commencer.
     </div>
   } @else {
-    <div class="card card-flush table-wrap">
+    <div class="card table-wrap">
       <table class="table">
         <thead>
-          <tr><th>Espace</th><th>Places</th><th>Plan</th><th>Statut</th><th class="right">Actions</th></tr>
+          <tr>
+            <th>Nom</th>
+            <th>Image</th>
+            <th>Lieu</th>
+            <th>Places</th>
+            <th>Plan</th>
+            <th>Statut</th>
+            <th></th>
+          </tr>
         </thead>
+
         <tbody>
           @for (s of spaces(); track s.id) {
             <tr>
+              <td><b>{{ s.name }}</b></td>
+
               <td>
-                <div class="user-cell">
-                  <span class="sp-icon"><app-icon name="building" [size]="17" /></span>
-                  <div>
-                    <div class="name">{{ s.name }}</div>
-                    <div class="sub row" style="gap: .25rem"><app-icon name="pin" [size]="12" /> {{ s.location || 'Lieu non précisé' }}</div>
-                  </div>
-                </div>
+                @if (s.imageUrl) {
+                  <img
+                    [src]="api.imageUrl(s.imageUrl)"
+                    [alt]="s.name"
+                    style="width: 80px; height: 55px; object-fit: cover; border-radius: 6px;"
+                  />
+                } @else {
+                  <span class="muted small">Aucune photo</span>
+                }
               </td>
-              <td><span class="strong tabular">{{ s.seatCount ?? 0 }}</span></td>
-              <td class="muted small tabular">{{ s.planWidth }} × {{ s.planHeight }}</td>
+
+              <td>{{ s.location || '—' }}</td>
+              <td>{{ s.seatCount ?? 0 }}</td>
+
+              <td class="muted small">
+                {{ s.planWidth }}×{{ s.planHeight }}
+              </td>
+
               <td>
-                <button class="status-btn" (click)="toggle(s)" [title]="s.isActive ? 'Fermer à la réservation' : 'Ouvrir à la réservation'">
-                  <span class="badge badge-dot" [class.badge-green]="s.isActive" [class.badge-gray]="!s.isActive">
-                    {{ s.isActive ? 'Ouvert' : 'Fermé' }}
-                  </span>
-                </button>
+                <span
+                  class="badge"
+                  [class.badge-green]="s.isActive"
+                  [class.badge-gray]="!s.isActive"
+                >
+                  {{ s.isActive ? 'Ouvert' : 'Fermé' }}
+                </span>
               </td>
-              <td>
-                <div class="actions">
-                  <a class="btn btn-soft btn-sm" [routerLink]="['../seats', s.id]"><app-icon name="grid" [size]="15" /> Plan</a>
-                  <button class="btn btn-ghost btn-sm btn-icon" (click)="openEdit(s)" title="Modifier" aria-label="Modifier"><app-icon name="pencil" [size]="15" /></button>
-                  <button class="btn btn-ghost btn-sm btn-icon" (click)="toggle(s)" [title]="s.isActive ? 'Fermer' : 'Ouvrir'" [attr.aria-label]="s.isActive ? 'Fermer' : 'Ouvrir'"><app-icon name="power" [size]="15" /></button>
-                  <button class="btn btn-ghost btn-sm btn-icon del" (click)="remove(s)" title="Supprimer" aria-label="Supprimer"><app-icon name="trash" [size]="15" /></button>
-                </div>
-              </td>
+
+              <td class="right">
+  <div class="space-actions">
+    <a
+      class="btn btn-outline btn-sm icon-btn"
+      [routerLink]="['../seats', s.id]"
+      title="Plan des places"
+      aria-label="Plan des places"
+    >
+      <span aria-hidden="true">▦</span>
+    </a>
+
+    <button
+      type="button"
+      class="btn btn-outline btn-sm icon-btn"
+      (click)="openEdit(s)"
+      title="Modifier"
+      aria-label="Modifier"
+    >
+      <span aria-hidden="true">✎</span>
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-outline btn-sm icon-btn"
+      (click)="toggle(s)"
+      [title]="s.isActive ? 'Fermer l’espace' : 'Ouvrir l’espace'"
+      [attr.aria-label]="s.isActive ? 'Fermer l’espace' : 'Ouvrir l’espace'"
+    >
+      <span aria-hidden="true">{{ s.isActive ? '⏸' : '▶' }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-danger btn-sm icon-btn"
+      (click)="remove(s)"
+      title="Supprimer"
+      aria-label="Supprimer"
+    >
+      <span aria-hidden="true">🗑</span>
+    </button>
+  </div>
+</td>
             </tr>
           }
         </tbody>
@@ -62,52 +166,168 @@
 
 @if (editing() !== null) {
   <div class="modal-backdrop" (click)="close()">
-    <div class="modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
-      <div class="modal-head">
-        <div class="modal-icon"><app-icon [name]="editing() === 'new' ? 'plus' : 'pencil'" [size]="20" /></div>
-        <div>
-          <h2>{{ editing() === 'new' ? 'Nouvel espace' : "Modifier l'espace" }}</h2>
-          <p>{{ editing() === 'new' ? 'Définissez la salle ; vous dessinerez ensuite son plan.' : 'Mettez à jour les informations de la salle.' }}</p>
-        </div>
-      </div>
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>
+        {{ editing() === 'new' ? 'Nouvel espace' : "Modifier l'espace" }}
+      </h2>
+
       <form [formGroup]="form" (ngSubmit)="save()" novalidate>
         <div class="form-group">
           <label for="sp-name">Nom</label>
-          <input id="sp-name" formControlName="name" placeholder="Ex. Open space Nord" />
+          <input id="sp-name" formControlName="name" />
+
           @if (form.controls.name.touched && form.controls.name.invalid) {
-            <div class="field-error"><app-icon name="alert-circle" [size]="13" /> Nom requis.</div>
+            <div class="field-error">
+              Le nom est obligatoire et doit contenir au moins 2 caractères.
+            </div>
           }
         </div>
+
         <div class="form-group">
           <label for="sp-loc">Lieu</label>
-          <div class="input-icon">
-            <span class="i-lead"><app-icon name="pin" [size]="16" /></span>
-            <input id="sp-loc" formControlName="location" placeholder="Ex. Rez-de-chaussée, bâtiment A" />
-          </div>
+          <input
+            id="sp-loc"
+            formControlName="location"
+            placeholder="Ex. Rez-de-chaussée, bâtiment A"
+          />
         </div>
+
         <div class="form-group">
           <label for="sp-desc">Description</label>
-          <textarea id="sp-desc" rows="3" formControlName="description" placeholder="Ambiance, équipements, accès…"></textarea>
+          <textarea
+            id="sp-desc"
+            rows="3"
+            formControlName="description"
+          ></textarea>
         </div>
+
+        <!-- Image upload: available for both creating and editing -->
+        <div class="form-group">
+          <label for="sp-image">Photo de l'espace</label>
+
+          <input
+            #imageInput
+            id="sp-image"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            (change)="onImageSelected($event)"
+          />
+
+          <small class="muted">
+            Formats acceptés : JPG, PNG et WebP. Taille maximale : 5 Mo.
+            Sélectionnez une nouvelle image pour remplacer la photo actuelle.
+          </small>
+
+          @if (imageError()) {
+            <div class="field-error">
+              {{ imageError() }}
+            </div>
+          }
+
+          @if (imagePreview(); as preview) {
+            <div style="margin-top: 1rem">
+              <p class="small">Aperçu de la nouvelle photo</p>
+
+              <img
+                [src]="preview"
+                alt="Aperçu de la nouvelle photo"
+                style="display: block; width: 100%; max-width: 320px; max-height: 200px; object-fit: cover; border-radius: 8px;"
+              />
+
+              <button
+                type="button"
+                class="btn btn-outline btn-sm"
+                style="margin-top: 0.5rem"
+                (click)="clearSelectedImage(imageInput)"
+              >
+                Annuler la nouvelle photo
+              </button>
+            </div>
+          } @else {
+            @if (currentImageUrl()) {
+              <div style="margin-top: 1rem">
+                <p class="small">Photo actuelle</p>
+
+                <img
+                  [src]="api.imageUrl(currentImageUrl())"
+                  alt="Photo actuelle de l'espace"
+                  style="display: block; width: 100%; max-width: 320px; max-height: 200px; object-fit: cover; border-radius: 8px;"
+                />
+              </div>
+            } @else {
+              <div class="space-detail-placeholder">
+                <span>🏢</span>
+                <span>Aucune photo enregistrée</span>
+              </div>
+            }
+          }
+        </div>
+
         <div class="form-row">
           <div class="form-group">
             <label for="sp-w">Largeur du plan (px)</label>
-            <input id="sp-w" type="number" formControlName="planWidth" />
-            <div class="hint">Entre 300 et 2000</div>
+            <input
+              id="sp-w"
+              type="number"
+              formControlName="planWidth"
+            />
+
+            @if (
+              form.controls.planWidth.touched &&
+              form.controls.planWidth.invalid
+            ) {
+              <div class="field-error">
+                La largeur doit être comprise entre 300 et 2000 px.
+              </div>
+            }
           </div>
+
           <div class="form-group">
             <label for="sp-h">Hauteur du plan (px)</label>
-            <input id="sp-h" type="number" formControlName="planHeight" />
-            <div class="hint">Entre 200 et 1500</div>
+            <input
+              id="sp-h"
+              type="number"
+              formControlName="planHeight"
+            />
+
+            @if (
+              form.controls.planHeight.touched &&
+              form.controls.planHeight.invalid
+            ) {
+              <div class="field-error">
+                La hauteur doit être comprise entre 200 et 1500 px.
+              </div>
+            }
           </div>
         </div>
-        <label class="check toggle-row">
+
+        <label class="row small" style="margin-bottom: 1rem">
           <input type="checkbox" formControlName="isActive" />
-          <div><b>Ouvert à la réservation</b><span class="muted xs">Les membres pourront réserver des places dans cet espace.</span></div>
+          Ouvert à la réservation
         </label>
-        <div class="modal-foot">
-          <button type="button" class="btn btn-outline" (click)="close()">Annuler</button>
-          <button type="submit" class="btn btn-primary"><app-icon name="check" [size]="16" /> Enregistrer</button>
+
+        <div class="row" style="justify-content: flex-end">
+          <button
+            type="button"
+            class="btn btn-outline"
+            (click)="close()"
+          >
+            Annuler
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="saving()"
+          >
+            {{
+              saving()
+                ? 'Enregistrement...'
+                : editing() === 'new'
+                  ? 'Créer l’espace'
+                  : 'Enregistrer'
+            }}
+          </button>
         </div>
       </form>
     </div>

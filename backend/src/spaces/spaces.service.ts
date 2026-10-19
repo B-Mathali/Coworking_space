@@ -26,15 +26,31 @@ export class SpacesService {
     return space;
   }
 
-  create(dto: CreateSpaceDto) {
-    return this.repo.save(this.repo.create(dto));
+  create(dto: CreateSpaceDto, imageUrl?: string) {
+  const space = this.repo.create({
+    ...dto,
+    ...(imageUrl ? { imageUrl } : {}),
+  });
+
+  return this.repo.save(space);
+}
+
+async update(
+  id: number,
+  dto: UpdateSpaceDto,
+  imageUrl?: string,
+) {
+  const space = await this.findOne(id);
+
+  Object.assign(space, dto);
+
+  // Replace the existing image only when a new one was uploaded.
+  if (imageUrl) {
+    space.imageUrl = imageUrl;
   }
 
-  async update(id: number, dto: UpdateSpaceDto) {
-    const space = await this.findOne(id);
-    Object.assign(space, dto);
-    return this.repo.save(space);
-  }
+  return this.repo.save(space);
+}
 
   async remove(id: number) {
     const space = await this.findOne(id);

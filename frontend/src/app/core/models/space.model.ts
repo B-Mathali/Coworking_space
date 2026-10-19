@@ -1,4 +1,4 @@
-export interface Space {
+﻿export interface Space {
   id: number;
   name: string;
   description: string | null;
@@ -6,6 +6,7 @@ export interface Space {
   planWidth: number;
   planHeight: number;
   isActive: boolean;
+  imageUrl?: string | null;
   createdAt?: string;
   seatCount?: number;
 }
@@ -14,7 +15,7 @@ export type SpacePayload = Partial<
   Pick<Space, 'name' | 'description' | 'location' | 'planWidth' | 'planHeight' | 'isActive'>
 >;
 
-/** Statut calculé par le backend pour le créneau demandé. */
+/** Statut calculأ© par le backend pour le crأ©neau demandأ©. */
 export type SeatStatus = 'AVAILABLE' | 'TAKEN' | 'MINE' | 'DISABLED';
 
 export interface SeatAvailability {
@@ -32,3 +33,4 @@ export interface Slot {
   start: Date;
   end: Date;
 }
+
