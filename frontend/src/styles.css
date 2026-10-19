@@ -1,17 +1,12 @@
-/* =========================================================
-   CoworkSpace — design system
-   Tokens → base → layout → composants → plan des places
-   ========================================================= */
-
 :root {
   /* Surfaces */
-  --bg: #f6f5f2;
-  --bg-elev: #fbfaf8;
+  --bg: #f7f7fb;
+  --bg-elev: #fafafd;
   --surface: #ffffff;
-  --surface-2: #f3f2ee;
-  --surface-3: #eceae4;
-  --border: #e7e4dd;
-  --border-strong: #d6d2c8;
+  --surface-2: #f3f3f8;
+  --surface-3: #eaeaf2;
+  --border: #e9e9f1;
+  --border-strong: #d7d7e3;
 
   /* Texte */
   --text: #16181d;
@@ -20,11 +15,11 @@
   --text-inv: #ffffff;
 
   /* Marque */
-  --primary: #3355ff;
-  --primary-hover: #2443e6;
-  --primary-soft: #eceffe;
-  --primary-soft-2: #dbe1ff;
-  --primary-ink: #1f36b8;
+  --primary: #5b4cf5;
+  --primary-hover: #4a3be3;
+  --primary-soft: #efedff;
+  --primary-soft-2: #e0dcff;
+  --primary-ink: #3b2db8;
   --accent: #ff7a45;
   --accent-hover: #f2622a;
   --accent-soft: #fff0e8;
@@ -44,7 +39,7 @@
 
   /* Plan */
   --plan-bg: #ffffff;
-  --plan-dot: #dcd8cf;
+  --plan-dot: #dcdce8;
 
   /* Formes */
   --r-xs: 6px;
@@ -52,7 +47,8 @@
   --r: 12px;
   --r-lg: 16px;
   --r-xl: 22px;
-  --ring: 0 0 0 4px rgb(51 85 255 / 18%);
+  --ring: 0 0 0 4px rgb(91 76 245 / 18%);
+  --sky: #38bdf8;
 
   --shadow-xs: 0 1px 2px rgb(22 24 29 / 5%);
   --shadow-sm: 0 1px 2px rgb(22 24 29 / 4%), 0 2px 6px rgb(22 24 29 / 4%);
@@ -80,11 +76,11 @@
   --text-2: #b3b8c3;
   --text-3: #7d8391;
 
-  --primary: #6b85ff;
-  --primary-hover: #8399ff;
-  --primary-soft: #1b2242;
-  --primary-soft-2: #24305e;
-  --primary-ink: #b5c2ff;
+  --primary: #8b7dff;
+  --primary-hover: #a094ff;
+  --primary-soft: #221d45;
+  --primary-soft-2: #2e2763;
+  --primary-ink: #c7c0ff;
   --accent: #ff8a5b;
   --accent-hover: #ff9d75;
   --accent-soft: #3a2117;
@@ -103,7 +99,7 @@
 
   --plan-bg: #12151a;
   --plan-dot: #2a2f39;
-  --ring: 0 0 0 4px rgb(107 133 255 / 26%);
+  --ring: 0 0 0 4px rgb(139 125 255 / 26%);
 
   --shadow-xs: 0 1px 2px rgb(0 0 0 / 30%);
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%), 0 2px 6px rgb(0 0 0 / 20%);

@@ -1,27 +1,24 @@
 <header class="nav" [class.open]="menuOpen()">
   <div class="nav-inner">
     <a class="brand" routerLink="/" (click)="menuOpen.set(false)">
-      <span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-      <span>Cowork<b>Space</b></span>
+      <span class="logo" aria-hidden="true"></span>
+      <span>Coworking <b>Space</b></span>
     </a>
 
-    @if (auth.isLoggedIn()) {
-      <nav class="links" aria-label="Navigation principale">
-        <a routerLink="/spaces" routerLinkActive="active" (click)="menuOpen.set(false)">
-          <app-icon name="building" [size]="17" /> Espaces
-        </a>
-        <a routerLink="/my-reservations" routerLinkActive="active" (click)="menuOpen.set(false)">
-          <app-icon name="ticket" [size]="17" /> Mes réservations
-        </a>
+    <span class="spacer"></span>
+
+    <nav class="links" aria-label="Navigation principale">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="menuOpen.set(false)">Accueil</a>
+      <a routerLink="/spaces" routerLinkActive="active" (click)="menuOpen.set(false)">Espaces</a>
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/my-reservations" routerLinkActive="active" (click)="menuOpen.set(false)">Mes réservations</a>
         @if (auth.isAdmin()) {
           <a routerLink="/admin" routerLinkActive="active" class="admin-link" (click)="menuOpen.set(false)">
-            <app-icon name="shield" [size]="17" /> Administration
+            <app-icon name="shield" [size]="15" /> Admin
           </a>
         }
-      </nav>
-    } @else {
-      <span class="spacer"></span>
-    }
+      }
+    </nav>
 
     <div class="right-side">
       <button class="icon-btn" (click)="theme.toggle()" [attr.aria-label]="theme.theme() === 'dark' ? 'Passer en thème clair' : 'Passer en thème sombre'">
@@ -40,15 +37,12 @@
           <app-icon name="logout" [size]="18" />
         </button>
       } @else {
-        <a class="btn btn-ghost btn-sm" routerLink="/login">Connexion</a>
-        <a class="btn btn-primary btn-sm" routerLink="/register">Inscription</a>
+        <a class="login-btn" routerLink="/login">Connexion</a>
       }
 
-      @if (auth.isLoggedIn()) {
-        <button class="icon-btn burger" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()" aria-label="Menu">
-          <app-icon [name]="menuOpen() ? 'x' : 'menu'" [size]="20" />
-        </button>
-      }
+      <button class="icon-btn burger" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()" aria-label="Menu">
+        <app-icon [name]="menuOpen() ? 'x' : 'menu'" [size]="20" />
+      </button>
     </div>
   </div>
 </header>

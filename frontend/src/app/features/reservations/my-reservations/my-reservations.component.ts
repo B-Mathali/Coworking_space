@@ -21,7 +21,7 @@ type Tab = 'upcoming' | 'past' | 'cancelled';
         padding: 1.5rem 1.75rem; margin-bottom: 1.75rem; border-radius: var(--r-xl); color: #fff;
         background:
           radial-gradient(70% 140% at 100% 0%, rgb(255 122 69 / 50%), transparent 60%),
-          linear-gradient(135deg, #2a46ff, #4b2fd0);
+          linear-gradient(135deg, #5b4cf5, #3aa8f0);
         box-shadow: 0 18px 40px rgb(42 70 255 / 25%);
       }
       .next h2 { color: #fff; font-size: 1.5rem; margin: .5rem 0 .8rem; }

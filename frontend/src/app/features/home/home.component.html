@@ -1,0 +1,125 @@
+<!-- ---------- Hero ---------- -->
+<section class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="wrap hero-inner">
+    <div class="hero-copy rise">
+      <span class="pill"><span class="pill-dot"></span> Votre espace. À votre façon.</span>
+      <h1>Trouvez le lieu où naissent <span class="grad">vos meilleures idées</span>.</h1>
+      <p class="lead">
+        Découvrez des espaces de coworking confortables, des bureaux privés et des salles de réunion.
+        Réservez votre poste idéal en quelques clics.
+      </p>
+
+      <div class="cta">
+        <a class="btn-pill btn-pill-primary" [routerLink]="auth.isLoggedIn() ? '/spaces' : '/register'">
+          {{ auth.isLoggedIn() ? 'Explorer les espaces' : 'Commencer' }} <app-icon name="arrow-right" [size]="17" />
+        </a>
+        <button type="button" class="btn-pill btn-pill-outline" (click)="scrollTo('how')">Comment ça marche</button>
+      </div>
+
+      <dl class="stats">
+        @for (s of stats; track s.label) {
+          <div><dt>{{ s.label }}</dt><dd>{{ s.value }}@if (s.unit) {<small>{{ s.unit }}</small>}</dd></div>
+        }
+      </dl>
+    </div>
+
+    <!-- Carte d'illustration (décorative) -->
+    <div class="showcase rise" style="animation-delay: 120ms" aria-hidden="true">
+      <div class="sc-card">
+        <div class="sc-visual">
+          <span class="chip-live"><i></i> Disponible aujourd’hui</span>
+          <svg class="desk" viewBox="0 0 320 150" fill="none">
+            <!-- lampe -->
+            <path d="M58 40a14 12 0 0 1 28 0Z" fill="#fbbf24" />
+            <rect x="70" y="40" width="4" height="78" rx="2" fill="#1e1b3a" />
+            <!-- écran -->
+            <rect x="122" y="22" width="120" height="78" rx="8" fill="#1e1b3a" />
+            <rect x="128" y="28" width="108" height="66" rx="5" fill="url(#scr)" />
+            <rect x="174" y="100" width="16" height="12" fill="#1e1b3a" />
+            <!-- plante -->
+            <rect x="254" y="86" width="22" height="30" rx="7" fill="#fff" />
+            <path d="M265 90c-11-10-12-22 0-30 12 8 11 20 0 30Z" fill="#34d399" />
+            <!-- bureau -->
+            <rect x="34" y="114" width="262" height="10" rx="5" fill="#fff" />
+            <defs>
+              <linearGradient id="scr" x1="128" y1="28" x2="236" y2="94" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6d5cff" /><stop offset="1" stop-color="#38bdf8" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="sc-body">
+          <h3>Espace moderne</h3>
+          <p>Postes ergonomiques dans un environnement calme et lumineux.</p>
+          <div class="sc-meta">
+            <span><app-icon name="pin" [size]="14" /> Tunis</span>
+            <span><app-icon name="users" [size]="14" /> 12 places</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="float float-booked">
+        <span class="f-icon ok"><app-icon name="check" [size]="16" [stroke]="2.6" /></span>
+        <div><b>Place n°7 réservée</b><small>Confirmation envoyée</small></div>
+      </div>
+      <div class="float float-wifi">
+        <span class="f-icon"><app-icon name="wifi" [size]="16" /></span>
+        <div><b>Wi-Fi haut débit</b><small>Dans chaque espace</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- Pourquoi ---------- -->
+<section class="band">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Pourquoi CoworkingSpace ?</span>
+      <h2>Tout pour travailler sereinement</h2>
+      <p>Une réservation simple, un plan clair et des espaces pensés pour la concentration.</p>
+    </div>
+
+    <div class="features">
+      @for (f of features; track f.title) {
+        <article class="feature" [attr.data-tone]="f.tone">
+          <span class="f-badge"><app-icon [name]="f.icon" [size]="20" /></span>
+          <h3>{{ f.title }}</h3>
+          <p>{{ f.text }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ---------- Comment ça marche ---------- -->
+<section class="wrap section" id="how">
+  <div class="section-head">
+    <span class="kicker">Comment ça marche</span>
+    <h2>Trois étapes, et c’est réservé</h2>
+  </div>
+
+  <ol class="steps">
+    @for (s of steps; track s.title; let i = $index) {
+      <li class="step">
+        <span class="step-n">0{{ i + 1 }}</span>
+        <span class="step-icon"><app-icon [name]="s.icon" [size]="22" /></span>
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.text }}</p>
+      </li>
+    }
+  </ol>
+</section>
+
+<!-- ---------- Appel à l'action ---------- -->
+<section class="wrap section last">
+  <div class="cta-band">
+    <div>
+      <h2>Prêt à trouver votre place ?</h2>
+      <p>Créez votre compte et réservez votre premier poste en moins d’une minute.</p>
+    </div>
+    <a class="btn-pill btn-pill-white" [routerLink]="auth.isLoggedIn() ? '/spaces' : '/register'">
+      {{ auth.isLoggedIn() ? 'Voir les espaces' : 'Créer mon compte' }} <app-icon name="arrow-right" [size]="17" />
+    </a>
+  </div>
+</section>

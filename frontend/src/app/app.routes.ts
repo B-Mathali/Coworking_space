@@ -3,9 +3,13 @@ import { adminGuard } from './core/guards/admin.guard';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'spaces' },
-
   // --- Public ---
+  {
+    path: '',
+    pathMatch: 'full',
+    title: 'CoworkingSpace — Réservation de places',
+    loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent),
+  },
   {
     path: 'login',
     title: 'Connexion',
@@ -113,5 +117,5 @@ export const routes: Routes = [
     ],
   },
 
-  { path: '**', redirectTo: 'spaces' },
+  { path: '**', redirectTo: '' },
 ];

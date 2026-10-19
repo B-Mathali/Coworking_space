@@ -1,111 +1,59 @@
 import { Component, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../../shared/icon/icon.component';
 
-/** Mise en page commune connexion / inscription : panneau de marque + formulaire. */
+/** Mise en page commune connexion / inscription : carte centrée sur fond doux. */
 @Component({
   selector: 'app-auth-shell',
   standalone: true,
-  imports: [IconComponent],
+  imports: [RouterLink, IconComponent],
   template: `
     <div class="shell">
-      <section class="visual" aria-hidden="true">
-        <div class="visual-inner">
-          <span class="eyebrow-inv"><app-icon name="sparkles" [size]="14" /> Coworking nouvelle génération</span>
-          <h2 class="headline">Votre bureau idéal,<br />réservé en <span>un clic</span>.</h2>
+      <div class="col rise">
+        <a class="brand" routerLink="/">Coworking<b>Space</b></a>
 
-          <div class="mock">
-            <div class="mock-head">
-              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-              <span class="mock-title">Open space — 2ᵉ étage</span>
-            </div>
-            <div class="mock-plan">
-              @for (s of mockSeats; track $index) {
-                <span class="ms" [class]="'ms ms-' + s"></span>
-              }
-            </div>
-            <div class="mock-foot">
-              <span><i class="ms-free"></i> 14 libres</span>
-              <span><i class="ms-mine"></i> Votre place</span>
-            </div>
-          </div>
-
-          <ul class="perks">
-            <li><app-icon name="pointer" [size]="16" /> Plan interactif en temps réel</li>
-            <li><app-icon name="clock" [size]="16" /> Créneaux flexibles, à l'heure ou à la journée</li>
-            <li><app-icon name="check-circle" [size]="16" /> Annulation gratuite en un clic</li>
-          </ul>
-        </div>
-      </section>
-
-      <section class="form-side">
-        <div class="form-box rise">
+        <section class="box">
+          <a class="back" routerLink="/"><app-icon name="arrow-left" [size]="15" /> Accueil</a>
+          @if (eyebrow()) { <span class="kicker">{{ eyebrow() }}</span> }
           <h1>{{ title() }}</h1>
           <p class="sub">{{ subtitle() }}</p>
           <ng-content />
-        </div>
-      </section>
+        </section>
+
+        <p class="foot">Un accès sécurisé à votre espace de travail.</p>
+      </div>
     </div>
   `,
   styles: [
     `
-      .shell { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); min-height: calc(100vh - var(--nav-h)); }
-      .visual {
-        position: relative; overflow: hidden; color: #fff; display: flex; align-items: center; justify-content: center; padding: 3rem;
+      .shell {
+        min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 1rem;
         background:
-          radial-gradient(900px 500px at 0% 0%, rgb(255 122 69 / 35%), transparent 60%),
-          radial-gradient(700px 600px at 100% 100%, rgb(110 140 255 / 55%), transparent 60%),
-          linear-gradient(150deg, #1a2fd6 0%, #2a46ff 45%, #3d2bc4 100%);
+          radial-gradient(50rem 40rem at 0% 0%, color-mix(in srgb, var(--primary) 9%, transparent), transparent 70%),
+          radial-gradient(40rem 30rem at 100% 100%, color-mix(in srgb, var(--sky) 8%, transparent), transparent 70%),
+          var(--bg);
       }
-      .visual::before {
-        content: ''; position: absolute; inset: 0; opacity: .14;
-        background-image: radial-gradient(circle, #fff 1px, transparent 1.4px); background-size: 22px 22px;
-        mask-image: linear-gradient(180deg, #000, transparent 85%);
+      .col { width: 100%; max-width: 440px; display: flex; flex-direction: column; align-items: center; }
+      .brand { font-size: 1.4rem; font-weight: 800; letter-spacing: -.04em; color: var(--text); margin-bottom: 1.4rem; }
+      .brand:hover { color: var(--text); }
+      .brand b { color: var(--primary); font-weight: 800; }
+      .box {
+        width: 100%; padding: 2.25rem 2.25rem 2rem; border-radius: 24px;
+        background: var(--surface); border: 1px solid var(--border);
+        box-shadow: 0 24px 60px color-mix(in srgb, var(--primary) 8%, transparent), var(--shadow-sm);
       }
-      .visual-inner { position: relative; max-width: 460px; width: 100%; }
-      .eyebrow-inv { display: inline-flex; align-items: center; gap: .4rem; font-size: .74rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: .35rem .7rem; border-radius: 999px; background: rgb(255 255 255 / 14%); border: 1px solid rgb(255 255 255 / 20%); }
-      .headline { color: #fff; font-size: clamp(1.8rem, 1.2rem + 1.6vw, 2.6rem); font-weight: 800; letter-spacing: -.035em; line-height: 1.1; margin: 1.1rem 0 1.8rem; }
-      .headline span { background: linear-gradient(90deg, #ffb48f, #ff7a45); -webkit-background-clip: text; background-clip: text; color: transparent; }
-
-      .mock { background: rgb(255 255 255 / 10%); border: 1px solid rgb(255 255 255 / 18%); border-radius: 18px; padding: 1rem; backdrop-filter: blur(10px); box-shadow: 0 30px 60px rgb(10 20 80 / 35%); }
-      .mock-head { display: flex; align-items: center; gap: .35rem; margin-bottom: .85rem; }
-      .dot { width: 8px; height: 8px; border-radius: 50%; background: rgb(255 255 255 / 35%); }
-      .mock-title { margin-left: .5rem; font-size: .78rem; font-weight: 650; opacity: .85; }
-      .mock-plan { display: grid; grid-template-columns: repeat(8, 1fr); gap: 7px; }
-      .ms { aspect-ratio: 1; border-radius: 7px; }
-      .ms-f, .ms-free { background: rgb(255 255 255 / 92%); }
-      .ms-t { background: rgb(255 255 255 / 22%); }
-      .ms-m, .ms-mine { background: #ff7a45; box-shadow: 0 0 0 3px rgb(255 122 69 / 35%); }
-      .ms-e { background: transparent; }
-      .mock-foot { display: flex; gap: 1.1rem; margin-top: .85rem; font-size: .76rem; font-weight: 650; opacity: .9; }
-      .mock-foot i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: .35rem; vertical-align: -1px; }
-
-      .perks { list-style: none; padding: 0; margin: 1.8rem 0 0; display: grid; gap: .7rem; font-size: .92rem; font-weight: 550; }
-      .perks li { display: flex; align-items: center; gap: .6rem; opacity: .95; }
-      .perks app-icon { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: rgb(255 255 255 / 14%); }
-
-      .form-side { display: flex; align-items: center; justify-content: center; padding: 3rem 1.5rem; }
-      .form-box { width: 100%; max-width: 400px; }
-      .form-box h1 { font-size: 1.85rem; }
-      .sub { color: var(--text-2); margin-bottom: 1.75rem; }
-
-      @media (max-width: 920px) {
-        .shell { grid-template-columns: 1fr; }
-        .visual { display: none; }
-        .form-side { padding: 2.5rem 1rem; align-items: flex-start; }
-      }
+      .back { display: inline-flex; align-items: center; gap: .3rem; font-size: .85rem; font-weight: 600; color: var(--text-3); margin-bottom: 1.6rem; }
+      .back:hover { color: var(--text); }
+      .kicker { display: block; font-size: .74rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--primary); margin-bottom: .6rem; }
+      h1 { font-size: 1.9rem; letter-spacing: -.04em; margin-bottom: .45rem; }
+      .sub { color: var(--text-2); font-size: .93rem; margin-bottom: 1.6rem; }
+      .foot { margin: 1.4rem 0 0; font-size: .8rem; color: var(--text-3); }
+      @media (max-width: 520px) { .box { padding: 1.6rem 1.25rem; border-radius: 20px; } }
     `,
   ],
 })
 export class AuthShellComponent {
+  readonly eyebrow = input('');
   readonly title = input.required<string>();
   readonly subtitle = input('');
-
-  // f = libre, t = occupée, m = la vôtre, e = allée
-  readonly mockSeats = [
-    'f', 't', 'f', 'e', 'e', 'f', 'f', 't',
-    'f', 'f', 't', 'e', 'e', 't', 'f', 'f',
-    'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e',
-    't', 'f', 'f', 'e', 'e', 'f', 'm', 'f',
-    'f', 't', 'f', 'e', 'e', 'f', 't', 'f',
-  ];
 }

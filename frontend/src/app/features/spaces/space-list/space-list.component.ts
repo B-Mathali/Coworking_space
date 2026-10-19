@@ -13,13 +13,24 @@ import { SpaceCardComponent } from '../space-card/space-card.component';
   templateUrl: './space-list.component.html',
   styles: [
     `
-      .summary { display: flex; gap: .5rem; }
-      .summary > div { display: flex; flex-direction: column; padding: .6rem 1rem; border-radius: var(--r); background: var(--surface); border: 1px solid var(--border); min-width: 92px; }
-      .summary b { font-size: 1.35rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
-      .summary span { font-size: .75rem; color: var(--text-3); font-weight: 600; }
-      .toolbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
-      .search { flex: 1; max-width: 420px; min-width: 220px; }
-      .search input { height: 44px; border-radius: var(--r); background: var(--surface); }
+      .list-page { max-width: 1080px; padding-top: 3.5rem; }
+      .intro { margin-bottom: 2.25rem; }
+      .kicker { display: block; font-size: .76rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--primary); margin-bottom: .8rem; }
+      .intro h1 { font-size: clamp(2rem, 1.3rem + 2.6vw, 3.3rem); line-height: 1.05; letter-spacing: -.045em; max-width: 16ch; margin-bottom: .9rem; }
+      .lead { color: var(--text-2); font-size: 1.05rem; margin: 0; }
+      .filter-bar {
+        display: flex; align-items: center; gap: 1rem; padding: .7rem; margin-bottom: 2rem;
+        background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-xs);
+      }
+      .search { flex: 1; }
+      .search input { height: 46px; border-radius: 12px; border-color: transparent; background: var(--surface-2); }
+      .search input:hover:not(:disabled) { border-color: var(--border-strong); }
+      .count { padding: 0 .75rem; font-size: .88rem; font-weight: 600; color: var(--text-2); white-space: nowrap; }
+      @media (max-width: 640px) {
+        .list-page { padding-top: 2rem; }
+        .filter-bar { flex-direction: column; align-items: stretch; gap: .5rem; }
+        .count { padding: 0 .25rem .2rem; }
+      }
     `,
   ],
 })

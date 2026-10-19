@@ -17,7 +17,7 @@ import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading
         height: 190px; display: grid; place-items: center; overflow: hidden;
         background:
           radial-gradient(80% 120% at 100% 0%, rgb(255 122 69 / 45%), transparent 60%),
-          linear-gradient(135deg, #2a46ff, #4b2fd0);
+          linear-gradient(135deg, #5b4cf5, #3aa8f0);
       }
       .hero-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; width: min(70%, 460px); transform: perspective(600px) rotateX(30deg); }
       .hero-grid span { aspect-ratio: 1; border-radius: 5px; background: rgb(255 255 255 / 20%); }

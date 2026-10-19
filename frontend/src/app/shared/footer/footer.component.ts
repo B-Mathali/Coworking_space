@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
   template: `
     <footer>
       <div class="inner">
-        <span><b>CoworkSpace</b> · Réservez votre place en quelques secondes.</span>
+        <span><b>CoworkingSpace</b> · Réservez votre place en quelques secondes.</span>
         <span>© {{ year }} — Projet Cloud TEK-UP</span>
       </div>
     </footer>

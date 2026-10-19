@@ -1,27 +1,19 @@
-<div class="container">
-  <div class="page-head">
-    <div>
-      <span class="eyebrow"><app-icon name="sparkles" [size]="14" /> {{ greeting() }}</span>
-      <h1>Choisissez votre espace</h1>
-      <p class="lead">Sélectionnez une salle, puis cliquez sur une place libre du plan pour la réserver.</p>
-    </div>
-    @if (!loading() && list().length > 0) {
-      <div class="summary">
-        <div><b class="tabular">{{ list().length }}</b><span>espaces</span></div>
-        <div><b class="tabular">{{ totalSeats() }}</b><span>places</span></div>
-      </div>
-    }
-  </div>
+<div class="container list-page">
+  <header class="intro">
+    <span class="kicker">{{ greeting() }} · Trouvez votre espace</span>
+    <h1>Choisissez votre espace de travail idéal.</h1>
+    <p class="lead">Sélectionnez une salle, puis cliquez sur une place libre du plan pour la réserver.</p>
+  </header>
 
   @if (!loading() && list().length > 0) {
-    <div class="toolbar">
+    <div class="filter-bar">
       <div class="input-icon search">
         <span class="i-lead"><app-icon name="search" [size]="17" /></span>
-        <input type="search" placeholder="Rechercher un espace ou un lieu…" [value]="query()" (input)="query.set($any($event.target).value)" aria-label="Rechercher" />
+        <input type="search" placeholder="Rechercher par nom, lieu ou description…" [value]="query()" (input)="query.set($any($event.target).value)" aria-label="Rechercher" />
       </div>
-      @if (query()) {
-        <span class="muted small">{{ filtered().length }} résultat(s)</span>
-      }
+      <span class="count">
+        @if (query()) { {{ filtered().length }} résultat(s) } @else { {{ list().length }} espaces · {{ totalSeats() }} places }
+      </span>
     </div>
   }
 
@@ -29,7 +21,7 @@
     <div class="grid grid-cards">
       @for (i of [1, 2, 3]; track i) {
         <div class="card card-flush">
-          <div class="skeleton" style="height: 148px; border-radius: 0"></div>
+          <div class="skeleton" style="height: 190px; border-radius: 0"></div>
           <div style="padding: 1.2rem">
             <div class="skeleton" style="height: 18px; width: 60%"></div>
             <div class="skeleton" style="height: 12px; width: 40%; margin-top: .6rem"></div>

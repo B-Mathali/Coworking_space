@@ -1,5 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter, map } from 'rxjs';
 import { AuthService } from './core/services/auth.service';
 import { ToastService } from './core/services/toast.service';
 import { ConfirmDialogComponent } from './shared/confirm-dialog/confirm-dialog.component';
@@ -13,9 +15,9 @@ import { NavbarComponent } from './shared/navbar/navbar.component';
   standalone: true,
   imports: [RouterOutlet, NavbarComponent, FooterComponent, ConfirmDialogComponent, IconComponent],
   template: `
-    <app-navbar />
+    @if (!isAuthPage()) { <app-navbar /> }
     <main class="main"><router-outlet /></main>
-    <app-footer />
+    @if (!isAuthPage()) { <app-footer /> }
     <app-confirm-dialog />
 
     <div class="toasts" aria-live="polite">
@@ -38,6 +40,16 @@ import { NavbarComponent } from './shared/navbar/navbar.component';
 export class AppComponent implements OnInit {
   private readonly auth = inject(AuthService);
   readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
+
+  /** Connexion / inscription s'affichent en plein écran, sans navbar ni footer. */
+  readonly isAuthPage = toSignal(
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map((e) => /^\/(login|register)(\?|$)/.test(e.urlAfterRedirects)),
+    ),
+    { initialValue: false },
+  );
 
   ngOnInit() {
     this.auth.refresh();
