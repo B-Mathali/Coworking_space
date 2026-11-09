@@ -38,6 +38,11 @@
         <div class="stat-value">{{ s.upcomingReservations }}</div>
         <span class="muted xs">réservations planifiées</span>
       </div>
+      <div class="card stat rise" style="animation-delay: 250ms">
+        <div class="stat-top"><span class="stat-label">Revenus du mois</span><span class="stat-icon green"><app-icon name="card" [size]="19" /></span></div>
+        <div class="stat-value tabular">{{ s.revenueThisMonth | money: s.currency }}</div>
+        <span class="muted xs">{{ s.revenueTotal | money: s.currency }} au total (TTC)</span>
+      </div>
     </div>
 
     <div class="dash-grid mt">

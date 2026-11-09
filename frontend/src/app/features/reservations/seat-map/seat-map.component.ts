@@ -1,6 +1,8 @@
 import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { SeatAvailability, SeatStatus, Slot, Space } from '../../../core/models/space.model';
+import { PaymentService } from '../../../core/services/payment.service';
 import { ReservationService } from '../../../core/services/reservation.service';
 import { SeatService } from '../../../core/services/seat.service';
 import { SpaceService } from '../../../core/services/space.service';
@@ -24,6 +26,7 @@ export class SeatMapComponent implements OnInit {
   private readonly spacesApi = inject(SpaceService);
   private readonly seatsApi = inject(SeatService);
   private readonly reservationsApi = inject(ReservationService);
+  private readonly paymentsApi = inject(PaymentService);
   private readonly toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -36,6 +39,7 @@ export class SeatMapComponent implements OnInit {
   readonly selectedId = signal<number | null>(null);
   readonly loading = signal(true);
   readonly busy = signal(false);
+  readonly billing = toSignal(this.paymentsApi.config$, { initialValue: null });
 
   readonly selected = computed(() => this.seats().find((s) => s.id === this.selectedId()) ?? null);
   readonly freeCount = computed(() => this.seats().filter((s) => s.status === 'AVAILABLE').length);
@@ -88,7 +92,12 @@ export class SeatMapComponent implements OnInit {
         endTime: slot.end.toISOString(),
       })
       .subscribe({
-        next: () => {
+        next: (resa) => {
+          if (resa.status === 'PENDING_PAYMENT') {
+            // Espace payant : la place est bloquée, on part payer sur Stripe.
+            this.goToCheckout(resa.id);
+            return;
+          }
           this.busy.set(false);
           this.toast.success(`Place ${seat.label} réservée !`);
           this.loadSeats();
@@ -99,6 +108,24 @@ export class SeatMapComponent implements OnInit {
           this.loadSeats(); // quelqu'un a peut-être pris la place entre-temps
         },
       });
+  }
+
+  /** Reprendre le paiement d'une réservation encore en attente. */
+  payMine() {
+    const seat = this.selected();
+    if (seat?.reservationId) this.goToCheckout(seat.reservationId);
+  }
+
+  private goToCheckout(reservationId: number) {
+    this.busy.set(true);
+    this.paymentsApi.checkout(reservationId).subscribe({
+      // On garde busy à true : le navigateur quitte la page pour Stripe.
+      error: (e) => {
+        this.busy.set(false);
+        this.toast.fromError(e, 'Paiement indisponible.');
+        this.loadSeats();
+      },
+    });
   }
 
   cancelMine() {

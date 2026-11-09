@@ -26,6 +26,7 @@
       </button>
 
       @if (auth.currentUser(); as u) {
+        <app-notification-bell />
         <div class="who">
           <app-avatar [name]="u.fullName" size="sm" />
           <div class="who-text">

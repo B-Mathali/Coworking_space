@@ -7,6 +7,8 @@ export interface User {
   role: Role;
   isActive?: boolean;
   createdAt?: string;
+  /** Réservations confirmées : renseigné uniquement dans la liste admin */
+  reservationCount?: number;
 }
 
 export interface AuthResponse {

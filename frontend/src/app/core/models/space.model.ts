@@ -5,6 +5,8 @@
   location: string | null;
   planWidth: number;
   planHeight: number;
+  /** Prix HT par heure ; 0 = gratuit */
+  pricePerHour: number;
   isActive: boolean;
   imageUrl?: string | null;
   createdAt?: string;
@@ -12,7 +14,7 @@
 }
 
 export type SpacePayload = Partial<
-  Pick<Space, 'name' | 'description' | 'location' | 'planWidth' | 'planHeight' | 'isActive'>
+  Pick<Space, 'name' | 'description' | 'location' | 'planWidth' | 'planHeight' | 'pricePerHour' | 'isActive'>
 >;
 
 /** Statut calculأ© par le backend pour le crأ©neau demandأ©. */
@@ -26,6 +28,8 @@ export interface SeatAvailability {
   isActive: boolean;
   status: SeatStatus;
   reservationId?: number;
+  /** Ma réservation attend encore son paiement */
+  pendingPayment?: boolean;
   reservedBy?: string;
 }
 

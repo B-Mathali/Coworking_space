@@ -5,6 +5,8 @@ import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
 import { databaseConfig } from './config/database.config';
+import { NotificationsModule } from './notifications/notifications.module';
+import { PaymentsModule } from './payments/payments.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { SeatsModule } from './seats/seats.module';
 import { SpacesModule } from './spaces/spaces.module';
@@ -19,6 +21,8 @@ import { UsersModule } from './users/users.module';
     SpacesModule,
     SeatsModule,
     ReservationsModule,
+    PaymentsModule,
+    NotificationsModule,
     AdminModule,
   ],
 })

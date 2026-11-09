@@ -32,6 +32,14 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.api}/register`, payload).pipe(tap((r) => this.store(r)));
   }
 
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.api}/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, password: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.api}/reset-password`, { token, password });
+  }
+
   /** Resynchronise le rôle/statut avec le serveur (ex. un admin a changé mon rôle). */
   refresh(): void {
     if (!this.token) return;

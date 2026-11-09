@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ResourceNotFoundException } from '../common/exceptions/resource-not-found.exception';
 import { Reservation, ReservationStatus } from '../reservations/entities/reservation.entity';
+import { activeReservation } from '../reservations/reservation-hold';
 import { Space } from '../spaces/entities/space.entity';
 import { BulkCreateSeatsDto, CreateSeatDto } from './dto/create-seat.dto';
 import { SeatAvailability, SeatStatus } from './dto/seat-availability.dto';
@@ -35,11 +36,13 @@ export class SeatsService {
     const seats = await this.seats.find({ where: { spaceId }, order: { label: 'ASC' } });
     if (seats.length === 0) return [];
 
+    // Les réservations en attente de paiement bloquent aussi la place (pendant le délai).
+    const active = activeReservation('r');
     const overlapping = await this.reservations
       .createQueryBuilder('r')
       .leftJoinAndSelect('r.user', 'u')
       .where('r.seatId IN (:...ids)', { ids: seats.map((s) => s.id) })
-      .andWhere('r.status = :status', { status: ReservationStatus.CONFIRMED })
+      .andWhere(active.sql, active.params)
       .andWhere('r.startTime < :end AND r.endTime > :start', { start, end })
       .getMany();
     const bySeat = new Map(overlapping.map((r) => [r.seatId, r]));
@@ -58,7 +61,10 @@ export class SeatsService {
         isActive: seat.isActive,
         status,
       };
-      if (resa && (resa.userId === userId || isAdmin)) item.reservationId = resa.id;
+      if (resa && (resa.userId === userId || isAdmin)) {
+        item.reservationId = resa.id;
+        if (resa.status === ReservationStatus.PENDING_PAYMENT) item.pendingPayment = true;
+      }
       if (resa && isAdmin) item.reservedBy = resa.user?.fullName;
       return item;
     });

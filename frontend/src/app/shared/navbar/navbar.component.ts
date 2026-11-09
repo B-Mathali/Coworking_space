@@ -4,11 +4,12 @@ import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { IconComponent } from '../icon/icon.component';
+import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, IconComponent, AvatarComponent],
+  imports: [RouterLink, RouterLinkActive, IconComponent, AvatarComponent, NotificationBellComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
 })

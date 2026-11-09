@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
 
 export class CreateSpaceDto {
   @IsString()
@@ -32,6 +33,15 @@ export class CreateSpaceDto {
   @Min(200)
   @Max(1500)
   planHeight?: number;
+
+  /** Prix HT par heure (0 = gratuit). @Type : arrive en texte quand le formulaire est en multipart. */
+  @ApiPropertyOptional({ default: 0, example: 5 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @Max(10000)
+  pricePerHour?: number;
 
   @ApiPropertyOptional({ default: true })
   @IsOptional()

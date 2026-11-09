@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { decimalTransformer } from '../../common/decimal.transformer';
 import { Seat } from '../../seats/entities/seat.entity';
 
 @Entity('spaces')
@@ -24,6 +25,10 @@ imageUrl: string | null;
 
   @Column({ type: 'int', default: 500 })
   planHeight: number;
+
+  /** Prix HT par heure ; 0 = réservation gratuite (pas de paiement) */
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, transformer: decimalTransformer })
+  pricePerHour: number;
 
   @Column({ default: true })
   isActive: boolean;

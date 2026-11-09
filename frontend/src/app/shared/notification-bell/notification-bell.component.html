@@ -1,0 +1,47 @@
+<button
+  class="bell"
+  type="button"
+  (click)="toggle()"
+  [attr.aria-expanded]="open()"
+  [attr.aria-label]="unread() ? 'Notifications, ' + unread() + ' non lues' : 'Notifications'"
+  title="Notifications"
+>
+  <app-icon name="bell" [size]="18" />
+  @if (unread() > 0) {
+    <span class="count" aria-hidden="true">{{ unread() > 9 ? '9+' : unread() }}</span>
+  }
+</button>
+
+@if (open()) {
+  <div class="panel" role="region" aria-label="Notifications">
+    <div class="panel-head">
+      <strong>Notifications</strong>
+      @if (unread() > 0) {
+        <button class="link" type="button" (click)="markAll()">Tout marquer comme lu</button>
+      }
+    </div>
+
+    @if (items().length === 0) {
+      <div class="none">
+        <app-icon name="bell" [size]="22" />
+        <p>Aucune notification pour le moment.</p>
+      </div>
+    } @else {
+      <ul>
+        @for (n of items(); track n.id) {
+          <li>
+            <button class="item" type="button" [class.unread]="!n.readAt" (click)="select(n)">
+              <span class="item-icon"><app-icon [name]="icon(n)" [size]="16" /></span>
+              <span class="item-body">
+                <span class="item-title">{{ n.title }}</span>
+                <span class="item-msg">{{ n.message }}</span>
+                <span class="item-date">{{ n.createdAt | date: 'd MMM, HH:mm' }}</span>
+              </span>
+              @if (!n.readAt) { <span class="dot" aria-label="Non lue"></span> }
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+}

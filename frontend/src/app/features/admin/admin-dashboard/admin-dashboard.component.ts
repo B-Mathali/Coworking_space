@@ -5,13 +5,14 @@ import { AdminStats } from '../../../core/models/reservation.model';
 import { AdminService } from '../../../core/services/admin.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { IconComponent } from '../../../shared/icon/icon.component';
+import { MoneyPipe } from '../../../shared/money/money.pipe';
 
 const RING_C = 2 * Math.PI * 50;
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [RouterLink, DatePipe, IconComponent],
+  imports: [RouterLink, DatePipe, IconComponent, MoneyPipe],
   templateUrl: './admin-dashboard.component.html',
   styles: [
     `

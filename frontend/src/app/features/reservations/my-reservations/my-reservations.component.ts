@@ -3,16 +3,18 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Reservation } from '../../../core/models/reservation.model';
 import { ConfirmService } from '../../../core/services/confirm.service';
+import { PaymentService } from '../../../core/services/payment.service';
 import { ReservationService } from '../../../core/services/reservation.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { IconComponent } from '../../../shared/icon/icon.component';
+import { MoneyPipe } from '../../../shared/money/money.pipe';
 
 type Tab = 'upcoming' | 'past' | 'cancelled';
 
 @Component({
   selector: 'app-my-reservations',
   standalone: true,
-  imports: [DatePipe, RouterLink, IconComponent],
+  imports: [DatePipe, RouterLink, IconComponent, MoneyPipe],
   templateUrl: './my-reservations.component.html',
   styles: [
     `
@@ -45,11 +47,14 @@ type Tab = 'upcoming' | 'past' | 'cancelled';
       .res-meta { display: flex; flex-wrap: wrap; gap: .3rem 1.1rem; margin-top: .35rem; font-size: .86rem; color: var(--text-2); }
       .res-meta span { display: inline-flex; align-items: center; gap: .35rem; }
       .res-meta b { color: var(--text); }
+      .res-actions { display: flex; gap: .4rem; flex-wrap: wrap; justify-content: flex-end; }
+      .pending-note { display: flex; align-items: center; gap: .3rem; margin: .4rem 0 0; color: var(--warning-ink); font-weight: 600; }
       @media (max-width: 600px) {
         .next { padding: 1.25rem; }
         .next-seat { display: none; }
         .res { flex-wrap: wrap; }
-        .res .btn { width: 100%; }
+        .res-actions { width: 100%; }
+        .res-actions .btn { flex: 1; }
       }
     `,
   ],
@@ -58,14 +63,17 @@ export class MyReservationsComponent implements OnInit {
   private readonly api = inject(ReservationService);
   private readonly toast = inject(ToastService);
   private readonly confirm = inject(ConfirmService);
+  private readonly payments = inject(PaymentService);
 
   readonly all = signal<Reservation[]>([]);
   readonly loading = signal(true);
   readonly tab = signal<Tab>('upcoming');
+  /** Réservation dont le paiement est en cours de lancement */
+  readonly paying = signal<number | null>(null);
 
   readonly upcoming = computed(() =>
     this.all()
-      .filter((r) => r.status === 'CONFIRMED' && new Date(r.endTime).getTime() > Date.now())
+      .filter((r) => r.status !== 'CANCELLED' && new Date(r.endTime).getTime() > Date.now())
       .sort((a, b) => +new Date(a.startTime) - +new Date(b.startTime)),
   );
   readonly past = computed(() =>
@@ -116,10 +124,30 @@ export class MyReservationsComponent implements OnInit {
     return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`;
   }
 
+  pay(r: Reservation) {
+    this.paying.set(r.id);
+    this.payments.checkout(r.id).subscribe({
+      error: (e) => {
+        this.paying.set(null);
+        this.toast.fromError(e, 'Paiement indisponible.');
+        this.load();
+      },
+    });
+  }
+
+  invoice(r: Reservation) {
+    this.payments.downloadInvoice(r.id, r.payment?.invoiceNumber ?? null).subscribe({
+      error: (e) => this.toast.fromError(e, 'Téléchargement impossible.'),
+    });
+  }
+
   async cancel(r: Reservation) {
+    const refund = r.payment?.status === 'PAID';
     const ok = await this.confirm.ask({
       title: 'Annuler cette réservation ?',
-      message: `La place ${r.seatLabel} (${r.spaceName}) sera libérée pour les autres membres.`,
+      message:
+        `La place ${r.seatLabel} (${r.spaceName}) sera libérée pour les autres membres.` +
+        (refund ? ' Le montant payé vous sera intégralement remboursé.' : ''),
       confirmText: 'Oui, annuler',
       cancelText: 'Garder',
       danger: true,
@@ -127,7 +155,7 @@ export class MyReservationsComponent implements OnInit {
     if (!ok) return;
     this.api.cancel(r.id).subscribe({
       next: () => {
-        this.toast.success('Réservation annulée.');
+        this.toast.success(refund ? 'Réservation annulée : remboursement en cours.' : 'Réservation annulée.');
         this.load();
       },
       error: (e) => this.toast.fromError(e),

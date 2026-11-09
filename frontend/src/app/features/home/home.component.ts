@@ -3,7 +3,6 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { IconComponent } from '../../shared/icon/icon.component';
 
-/** Page d'accueil publique : présentation du service et accès rapide. */
 @Component({
   selector: 'app-home',
   standalone: true,

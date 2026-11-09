@@ -21,6 +21,22 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/register/register.component').then((m) => m.RegisterComponent),
   },
+  {
+    path: 'forgot-password',
+    title: 'Mot de passe oublié',
+    loadComponent: () =>
+      import('./features/auth/forgot-password/forgot-password.component').then(
+        (m) => m.ForgotPasswordComponent,
+      ),
+  },
+  {
+    path: 'reset-password',
+    title: 'Nouveau mot de passe',
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password.component').then(
+        (m) => m.ResetPasswordComponent,
+      ),
+  },
 
   // --- Utilisateur connecté ---
   {
@@ -53,6 +69,26 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/reservations/my-reservations/my-reservations.component').then(
         (m) => m.MyReservationsComponent,
+      ),
+  },
+
+  // --- Retour de Stripe Checkout ---
+  {
+    path: 'payment/success',
+    title: 'Paiement',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/payments/payment-result/payment-result.component').then(
+        (m) => m.PaymentResultComponent,
+      ),
+  },
+  {
+    path: 'payment/cancel',
+    title: 'Paiement annulé',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/payments/payment-result/payment-result.component').then(
+        (m) => m.PaymentResultComponent,
       ),
   },
 
