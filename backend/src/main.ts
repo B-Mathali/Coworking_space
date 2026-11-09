@@ -9,7 +9,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { setupSwagger } from './swagger/swagger.setup';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // rawBody : le webhook Stripe vérifie sa signature sur le corps brut de la requête
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const config = app.get(ConfigService);
 
   app.use(

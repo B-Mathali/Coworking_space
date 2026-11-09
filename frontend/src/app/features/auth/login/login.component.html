@@ -27,6 +27,9 @@
       @if (form.controls.password.touched && form.controls.password.invalid) {
         <div class="field-error"><app-icon name="alert-circle" [size]="13" /> 6 caractères minimum.</div>
       }
+      <div style="text-align: right; margin-top: .5rem">
+        <a routerLink="/forgot-password" class="small strong" style="color: var(--primary)">Mot de passe oublié ?</a>
+      </div>
     </div>
 
     <button class="btn btn-primary btn-lg btn-block mt" type="submit" [disabled]="loading()">

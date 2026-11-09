@@ -36,7 +36,11 @@
             </div>
             <div class="fact">
               <span class="fi"><app-icon name="clock" [size]="18" /></span>
-              <div><b>Flexible</b><span>à l'heure ou à la journée</span></div>
+              @if (s.pricePerHour > 0) {
+                <div><b>{{ s.pricePerHour | money }} / h</b><span>HT, payable en ligne</span></div>
+              } @else {
+                <div><b>Gratuit</b><span>à l'heure ou à la journée</span></div>
+              }
             </div>
           </div>
 

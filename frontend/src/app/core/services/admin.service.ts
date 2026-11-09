@@ -18,11 +18,23 @@ export class AdminService {
     return this.http.get<User[]>(`${this.api}/users`);
   }
 
+  createUser(payload: {
+    fullName: string;
+    email: string;
+    role: Role;
+  }): Observable<{ user: User; emailSent: boolean }> {
+    return this.http.post<{ user: User; emailSent: boolean }>(`${this.api}/users`, payload);
+  }
+
   updateUser(
     id: number,
-    patch: Partial<{ fullName: string; role: Role; isActive: boolean }>,
+    patch: Partial<{ fullName: string; email: string; role: Role; isActive: boolean }>,
   ): Observable<User> {
     return this.http.patch<User>(`${this.api}/users/${id}`, patch);
+  }
+
+  sendPasswordReset(id: number): Observable<{ emailSent: boolean }> {
+    return this.http.post<{ emailSent: boolean }>(`${this.api}/users/${id}/send-password-reset`, {});
   }
 
   removeUser(id: number): Observable<void> {
@@ -32,6 +44,7 @@ export class AdminService {
   reservations(filter: ReservationFilter = {}): Observable<Reservation[]> {
     let params = new HttpParams();
     if (filter.spaceId) params = params.set('spaceId', filter.spaceId);
+    if (filter.userId) params = params.set('userId', filter.userId);
     if (filter.status) params = params.set('status', filter.status);
     if (filter.from) params = params.set('from', new Date(`${filter.from}T00:00:00`).toISOString());
     if (filter.to) params = params.set('to', new Date(`${filter.to}T23:59:59`).toISOString());

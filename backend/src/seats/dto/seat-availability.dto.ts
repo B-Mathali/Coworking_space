@@ -24,6 +24,8 @@ export interface SeatAvailability {
   status: SeatStatus;
   /** Présent si la place est à moi (pour annuler) ou si l'appelant est admin */
   reservationId?: number;
+  /** La réservation attend encore son paiement Stripe */
+  pendingPayment?: boolean;
   /** Visible uniquement par l'admin */
   reservedBy?: string;
 }

@@ -75,7 +75,10 @@
           [spaceName]="sp.name"
           [slot]="slot()"
           [busy]="busy()"
+          [pricePerHour]="sp.pricePerHour"
+          [billing]="billing()"
           (reserve)="reserve()"
+          (pay)="payMine()"
           (cancelMine)="cancelMine()"
           (closed)="selectedId.set(null)"
         />

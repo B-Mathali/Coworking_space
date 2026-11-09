@@ -72,6 +72,9 @@
               <h3>{{ r.spaceName }}</h3>
               @if (r.status === 'CANCELLED') {
                 <span class="badge badge-gray">Annulée</span>
+                @if (r.payment?.status === 'REFUNDED') { <span class="badge badge-blue">Remboursée</span> }
+              } @else if (r.status === 'PENDING_PAYMENT') {
+                <span class="badge badge-yellow badge-dot">En attente de paiement</span>
               } @else if (tab() === 'past') {
                 <span class="badge badge-gray">Terminée</span>
               } @else if (isOngoing(r)) {
@@ -84,12 +87,26 @@
               <span><app-icon name="seat" [size]="15" /> Place <b>{{ r.seatLabel }}</b></span>
               <span class="tabular"><app-icon name="clock" [size]="15" /> {{ r.startTime | date: 'HH:mm' }} → {{ r.endTime | date: 'HH:mm' }}</span>
               <span class="muted">{{ duration(r) }}</span>
+              @if (r.payment; as p) {
+                <span><app-icon name="card" [size]="15" /> <b class="tabular">{{ p.amountTTC | money: p.currency }}</b></span>
+              }
             </div>
+            @if (r.status === 'PENDING_PAYMENT' && r.paymentDeadline) {
+              <p class="xs pending-note"><app-icon name="clock" [size]="12" /> Place bloquée jusqu'à {{ r.paymentDeadline | date: 'HH:mm' }} : payez pour confirmer.</p>
+            }
           </div>
 
-          @if (tab() === 'upcoming') {
-            <button class="btn btn-outline btn-sm" (click)="cancel(r)"><app-icon name="x" [size]="15" /> Annuler</button>
-          }
+          <div class="res-actions">
+            @if (r.status === 'PENDING_PAYMENT') {
+              <button class="btn btn-accent btn-sm" [disabled]="paying() === r.id" (click)="pay(r)"><app-icon name="card" [size]="15" /> Payer</button>
+            }
+            @if (r.payment?.invoiceNumber) {
+              <button class="btn btn-outline btn-sm" (click)="invoice(r)" title="Télécharger la facture PDF"><app-icon name="file" [size]="15" /> Facture</button>
+            }
+            @if (tab() === 'upcoming') {
+              <button class="btn btn-outline btn-sm" (click)="cancel(r)"><app-icon name="x" [size]="15" /> Annuler</button>
+            }
+          </div>
         </article>
       }
     </div>

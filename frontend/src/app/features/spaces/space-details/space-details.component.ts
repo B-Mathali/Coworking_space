@@ -5,11 +5,12 @@ import { SpaceService } from '../../../core/services/space.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { IconComponent } from '../../../shared/icon/icon.component';
 import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
+import { MoneyPipe } from '../../../shared/money/money.pipe';
 
 @Component({
   selector: 'app-space-details',
   standalone: true,
-  imports: [RouterLink, LoadingSpinnerComponent, IconComponent],
+  imports: [RouterLink, LoadingSpinnerComponent, IconComponent, MoneyPipe],
   templateUrl: './space-details.component.html',
   styles: [
     `

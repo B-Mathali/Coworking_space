@@ -74,6 +74,7 @@
             <th>Image</th>
             <th>Lieu</th>
             <th>Places</th>
+            <th>Tarif / h HT</th>
             <th>Plan</th>
             <th>Statut</th>
             <th></th>
@@ -99,6 +100,9 @@
 
               <td>{{ s.location || '—' }}</td>
               <td>{{ s.seatCount ?? 0 }}</td>
+              <td class="tabular">
+                @if (s.pricePerHour > 0) { {{ s.pricePerHour | money }} } @else { <span class="badge badge-green">Gratuit</span> }
+              </td>
 
               <td class="muted small">
                 {{ s.planWidth }}×{{ s.planHeight }}
@@ -299,6 +303,16 @@
               </div>
             }
           </div>
+        </div>
+
+        <div class="form-group">
+          <label for="sp-price">Tarif horaire HT (0 = gratuit)</label>
+          <input id="sp-price" type="number" min="0" step="0.5" formControlName="pricePerHour" />
+          <small class="muted">La TVA est ajoutée au paiement. Le montant est figé au moment de chaque réservation.</small>
+
+          @if (form.controls.pricePerHour.touched && form.controls.pricePerHour.invalid) {
+            <div class="field-error">Le tarif doit être compris entre 0 et 10 000.</div>
+          }
         </div>
 
         <label class="row small" style="margin-bottom: 1rem">

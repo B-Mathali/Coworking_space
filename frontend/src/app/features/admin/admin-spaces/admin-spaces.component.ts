@@ -17,6 +17,7 @@ import { Space } from '../../../core/models/space.model';
 import { SpaceService } from '../../../core/services/space.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
+import { MoneyPipe } from '../../../shared/money/money.pipe';
 
 @Component({
   selector: 'app-admin-spaces',
@@ -25,6 +26,7 @@ import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading
     ReactiveFormsModule,
     RouterLink,
     LoadingSpinnerComponent,
+    MoneyPipe,
   ],
   templateUrl: './admin-spaces.component.html',
 })
@@ -75,6 +77,7 @@ export class AdminSpacesComponent implements OnInit, OnDestroy {
         Validators.max(1500),
       ],
     ],
+    pricePerHour: [0, [Validators.required, Validators.min(0), Validators.max(10000)]],
     isActive: [true],
   });
 
@@ -95,6 +98,7 @@ export class AdminSpacesComponent implements OnInit, OnDestroy {
       description: '',
       planWidth: 800,
       planHeight: 500,
+      pricePerHour: 0,
       isActive: true,
     });
 
@@ -110,6 +114,7 @@ export class AdminSpacesComponent implements OnInit, OnDestroy {
       description: space.description ?? '',
       planWidth: space.planWidth,
       planHeight: space.planHeight,
+      pricePerHour: space.pricePerHour ?? 0,
       isActive: space.isActive,
     });
 
@@ -254,6 +259,7 @@ export class AdminSpacesComponent implements OnInit, OnDestroy {
     description: string | undefined;
     planWidth: number;
     planHeight: number;
+    pricePerHour: number;
     isActive: boolean;
   }): FormData {
     const data = new FormData();
@@ -262,6 +268,7 @@ export class AdminSpacesComponent implements OnInit, OnDestroy {
     data.append('name', payload.name);
     data.append('planWidth', String(payload.planWidth));
     data.append('planHeight', String(payload.planHeight));
+    data.append('pricePerHour', String(payload.pricePerHour));
     data.append('isActive', String(payload.isActive));
 
     if (payload.location) {

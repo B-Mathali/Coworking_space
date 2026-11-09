@@ -2,6 +2,7 @@ import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Space } from '../../../core/models/space.model';
 import { IconComponent } from '../../../shared/icon/icon.component';
+import { MoneyPipe } from '../../../shared/money/money.pipe';
 
 /** Teinte pastel stable par espace (violet, pêche, menthe, ciel, rose, ambre). */
 const COVER_HUES = [250, 22, 160, 200, 330, 42];
@@ -10,7 +11,7 @@ const COVER_ICONS = ['building', 'seat', 'users', 'coffee', 'sparkles', 'grid'];
 @Component({
   selector: 'app-space-card',
   standalone: true,
-  imports: [RouterLink, IconComponent],
+  imports: [RouterLink, IconComponent, MoneyPipe],
   template: `
     <article class="sc">
       <a class="cover" [routerLink]="['/spaces', space().id]" [style.--h]="hue()" [attr.aria-label]="'Détails de ' + space().name">
@@ -29,6 +30,7 @@ const COVER_ICONS = ['building', 'seat', 'users', 'coffee', 'sparkles', 'grid'];
 
         <div class="meta">
           <span><app-icon name="users" [size]="15" /> {{ space().seatCount ?? 0 }} places</span>
+          <span class="price">{{ space().pricePerHour > 0 ? (space().pricePerHour | money) + ' / h' : 'Gratuit' }}</span>
           <a [routerLink]="['/spaces', space().id]">Détails</a>
         </div>
 
@@ -79,6 +81,7 @@ const COVER_ICONS = ['building', 'seat', 'users', 'coffee', 'sparkles', 'grid'];
       .meta span { display: inline-flex; align-items: center; gap: .35rem; }
       .meta span app-icon { color: var(--primary); }
       .meta a { font-weight: 700; color: var(--text-2); }
+      .meta .price { color: var(--text); font-weight: 750; }
       .meta a:hover { color: var(--primary); }
       .book {
         display: flex; align-items: center; justify-content: center; gap: .4rem; height: 42px; margin-top: 1rem;

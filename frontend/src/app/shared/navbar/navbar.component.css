@@ -62,3 +62,10 @@
   .right-side { margin-left: auto; }
   .links a { border-radius: 12px; }
 }
+
+/* Téléphone : la cloche prend la place de l'avatar, purement informatif, pour garder le logo sur une ligne. */
+@media (max-width: 480px) {
+  .who { display: none; }
+  .brand { font-size: 1rem; white-space: nowrap; }
+  .right-side { gap: .15rem; }
+}

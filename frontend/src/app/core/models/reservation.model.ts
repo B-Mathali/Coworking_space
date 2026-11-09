@@ -1,4 +1,18 @@
-export type ReservationStatus = 'CONFIRMED' | 'CANCELLED';
+export type ReservationStatus = 'PENDING_PAYMENT' | 'CONFIRMED' | 'CANCELLED';
+
+export type PaymentStatus = 'PENDING' | 'PAID' | 'EXPIRED' | 'CANCELLED' | 'REFUNDED';
+
+export interface PaymentSummary {
+  status: PaymentStatus;
+  amountHT: number;
+  vatAmount: number;
+  amountTTC: number;
+  currency: string;
+  invoiceNumber: string | null;
+  paidAt: string | null;
+  cardBrand: string | null;
+  cardLast4: string | null;
+}
 
 export interface Reservation {
   id: number;
@@ -13,6 +27,10 @@ export interface Reservation {
   endTime: string;
   status: ReservationStatus;
   createdAt: string;
+  /** Fin du délai pour payer (réservation PENDING_PAYMENT) */
+  paymentDeadline: string | null;
+  /** null pour un espace gratuit */
+  payment: PaymentSummary | null;
 }
 
 export interface CreateReservationPayload {
@@ -23,6 +41,7 @@ export interface CreateReservationPayload {
 
 export interface ReservationFilter {
   spaceId?: number | null;
+  userId?: number | null;
   status?: ReservationStatus | '';
   from?: string;
   to?: string;
@@ -38,4 +57,17 @@ export interface AdminStats {
   currentlyOccupied: number;
   occupancyRate: number;
   last7Days: { date: string; count: number }[];
+  revenueThisMonth: number;
+  revenueTotal: number;
+  currency: string;
+}
+
+export interface BillingConfig {
+  currency: string;
+  vatRate: number;
+}
+
+export interface PaymentConfirmation {
+  outcome: 'PAID' | 'REFUNDED' | 'PENDING';
+  reservation: Reservation;
 }

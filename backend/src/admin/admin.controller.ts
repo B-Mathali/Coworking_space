@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import { ReservationFilterDto } from '../reservations/dto/create-reservation.dto
 import { ReservationsService } from '../reservations/reservations.service';
 import { Role } from '../users/entities/user.entity';
 import { AdminService } from './admin.service';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 /** Toutes les routes /admin/* exigent un JWT valide ET le rôle ADMIN. */
@@ -41,6 +43,17 @@ export class AdminController {
   @Get('users')
   users() {
     return this.admin.listUsers();
+  }
+
+  @Post('users')
+  createUser(@Body() dto: CreateUserDto) {
+    return this.admin.createUser(dto);
+  }
+
+  @Post('users/:id/send-password-reset')
+  @HttpCode(200)
+  sendPasswordReset(@Param('id', ParseIntPipe) id: number) {
+    return this.admin.sendPasswordReset(id);
   }
 
   @Patch('users/:id')

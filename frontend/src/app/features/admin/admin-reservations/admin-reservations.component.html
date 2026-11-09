@@ -7,6 +7,13 @@
     </div>
   </div>
 
+  @if (userFilter(); as u) {
+    <div class="alert" style="justify-content: space-between; align-items: center">
+      <span>Réservations de <strong>{{ u.name }}</strong></span>
+      <button class="btn btn-ghost btn-sm" (click)="clearUserFilter()"><app-icon name="x" [size]="14" /> Voir tout</button>
+    </div>
+  }
+
   <div class="card filters">
     <div class="form-row">
       <div class="form-group mb-0">
@@ -21,6 +28,7 @@
         <select id="f-status" [(ngModel)]="status">
           <option value="">Tous</option>
           <option value="CONFIRMED">Confirmées</option>
+          <option value="PENDING_PAYMENT">En attente de paiement</option>
           <option value="CANCELLED">Annulées</option>
         </select>
       </div>
@@ -56,7 +64,7 @@
     <div class="card card-flush table-wrap">
       <table class="table">
         <thead>
-          <tr><th>Utilisateur</th><th>Espace</th><th>Place</th><th>Date</th><th>Horaire</th><th>Statut</th><th></th></tr>
+          <tr><th>Utilisateur</th><th>Espace</th><th>Place</th><th>Date</th><th>Horaire</th><th>Paiement</th><th>Statut</th><th></th></tr>
         </thead>
         <tbody>
           @for (r of rows(); track r.id) {
@@ -74,13 +82,24 @@
               <td><span class="seat-tag">{{ r.seatLabel }}</span></td>
               <td style="text-transform: capitalize; white-space: nowrap">{{ r.startTime | date: 'EEE d MMM y' }}</td>
               <td class="tabular" style="white-space: nowrap">{{ r.startTime | date: 'HH:mm' }} → {{ r.endTime | date: 'HH:mm' }}</td>
+              <td style="white-space: nowrap">
+                @if (r.payment; as p) {
+                  <div class="tabular"><b>{{ p.amountTTC | money: p.currency }}</b></div>
+                  <span class="xs" [class]="paymentClass[p.status]">{{ paymentLabel[p.status] }}</span>
+                } @else {
+                  <span class="muted small">Gratuit</span>
+                }
+              </td>
               <td>
-                <span class="badge badge-dot" [class.badge-green]="r.status === 'CONFIRMED'" [class.badge-gray]="r.status === 'CANCELLED'">
-                  {{ r.status === 'CONFIRMED' ? 'Confirmée' : 'Annulée' }}
+                <span class="badge badge-dot" [class.badge-green]="r.status === 'CONFIRMED'" [class.badge-yellow]="r.status === 'PENDING_PAYMENT'" [class.badge-gray]="r.status === 'CANCELLED'">
+                  {{ statusLabel[r.status] }}
                 </span>
               </td>
-              <td class="right">
-                @if (r.status === 'CONFIRMED') {
+              <td class="right" style="white-space: nowrap">
+                @if (r.payment?.invoiceNumber) {
+                  <button class="btn btn-ghost btn-sm btn-icon" (click)="invoice(r)" title="Facture PDF" aria-label="Télécharger la facture"><app-icon name="file" [size]="16" /></button>
+                }
+                @if (r.status !== 'CANCELLED') {
                   <button class="btn btn-danger-soft btn-sm" (click)="cancel(r)"><app-icon name="x" [size]="14" /> Annuler</button>
                 }
               </td>
