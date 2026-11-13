@@ -51,6 +51,6 @@ export class Notification {
   @Column({ type: 'datetime', precision: 3, nullable: true })
   readAt: Date | null;
 
-  @CreateDateColumn({ type: 'datetime', precision: 3 })
+  @CreateDateColumn({ type: 'datetime', precision: 3, default: () => 'CURRENT_TIMESTAMP(3)' })
   createdAt: Date;
 }

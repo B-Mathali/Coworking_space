@@ -41,6 +41,6 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
-  @CreateDateColumn({ type: 'datetime', precision: 3 })
+  @CreateDateColumn({ type: 'datetime', precision: 3, default: () => 'CURRENT_TIMESTAMP(3)' })
   createdAt: Date;
 }

@@ -3,6 +3,7 @@ dist/
 .angular/
 *.log
 
+.env
 backend/.env
 
 backend/uploads/

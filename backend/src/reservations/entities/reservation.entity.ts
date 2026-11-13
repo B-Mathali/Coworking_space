@@ -52,7 +52,7 @@ export class Reservation {
   @Column({ type: 'datetime', precision: 3, nullable: true })
   reminderSentAt: Date | null;
 
-  @CreateDateColumn({ type: 'datetime', precision: 3 })
+  @CreateDateColumn({ type: 'datetime', precision: 3, default: () => 'CURRENT_TIMESTAMP(3)' })
   createdAt: Date;
 
   /** Absent pour un espace gratuit */
