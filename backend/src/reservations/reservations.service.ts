@@ -1,0 +1,198 @@
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { ReservationConflictException } from '../common/exceptions/reservation-conflict.exception';
+import { ResourceNotFoundException } from '../common/exceptions/resource-not-found.exception';
+import { BookingNotificationsService } from '../notifications/booking-notifications.service';
+import { Payment, PaymentStatus } from '../payments/entities/payment.entity';
+import { computePrice } from '../payments/pricing';
+import { StripeService } from '../payments/stripe.service';
+import { Seat } from '../seats/entities/seat.entity';
+import { Space } from '../spaces/entities/space.entity';
+import { Role } from '../users/entities/user.entity';
+import { CreateReservationDto, ReservationFilterDto } from './dto/create-reservation.dto';
+import { ReservationResponseDto } from './dto/reservation-response.dto';
+import { Reservation, ReservationStatus } from './entities/reservation.entity';
+import { activeReservation } from './reservation-hold';
+
+const MAX_DURATION_MS = 12 * 60 * 60 * 1000; // 12 h max par réservation
+const CLOCK_TOLERANCE_MS = 60 * 1000;
+
+@Injectable()
+export class ReservationsService {
+  constructor(
+    @InjectRepository(Reservation) private readonly repo: Repository<Reservation>,
+    private readonly dataSource: DataSource,
+    private readonly stripe: StripeService,
+    private readonly config: ConfigService,
+    private readonly notifier: BookingNotificationsService,
+  ) {}
+
+  /**
+   * Réserve une place. Tout se passe dans UNE transaction :
+   * 1) on verrouille la ligne de la place (pessimistic_write) → deux clics simultanés sur la même
+   *    place sont sérialisés, le second verra la réservation du premier ;
+   * 2) on vérifie le chevauchement sur cette place ;
+   * 3) on vérifie que l'utilisateur n'occupe pas déjà une autre place sur le même créneau.
+   * Si l'espace est payant, la réservation reste PENDING_PAYMENT (place bloquée 30 min)
+   * jusqu'au paiement Stripe, et le montant est figé dans la table payments.
+   */
+  async create(userId: number, dto: CreateReservationDto): Promise<ReservationResponseDto> {
+    const start = new Date(dto.startTime);
+    const end = new Date(dto.endTime);
+    this.validateSlot(start, end);
+
+    const id = await this.dataSource.transaction(async (m) => {
+      const seat = await m.findOne(Seat, {
+        where: { id: dto.seatId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!seat) throw new ResourceNotFoundException('Place');
+      if (!seat.isActive) throw new BadRequestException('Cette place est désactivée.');
+
+      const space = await m.findOne(Space, { where: { id: seat.spaceId } });
+      if (!space?.isActive) throw new BadRequestException("Cet espace n'est pas ouvert à la réservation.");
+
+      const active = activeReservation('r');
+      const params = { ...active.params, start, end };
+      const overlap = `${active.sql} AND r.startTime < :end AND r.endTime > :start`;
+
+      const seatTaken = await m
+        .createQueryBuilder(Reservation, 'r')
+        .where('r.seatId = :seatId', { seatId: seat.id })
+        .andWhere(overlap, params)
+        .getExists();
+      if (seatTaken) throw new ReservationConflictException();
+
+
+      const paid = space.pricePerHour > 0;
+      const saved = await m.save(
+        Reservation,
+        m.create(Reservation, {
+          userId,
+          seatId: seat.id,
+          startTime: start,
+          endTime: end,
+          status: paid ? ReservationStatus.PENDING_PAYMENT : ReservationStatus.CONFIRMED,
+        }),
+      );
+
+      if (paid) {
+        const price = computePrice(space.pricePerHour, start, end, this.config.get<number>('billing.vatRate')!);
+        await m.save(
+          Payment,
+          m.create(Payment, {
+            ...price,
+            reservationId: saved.id,
+            currency: this.config.get<string>('billing.currency')!,
+            status: PaymentStatus.PENDING,
+          }),
+        );
+      }
+      return saved.id;
+    });
+
+    const created = await this.findOneDto(id);
+    // Espace payant : la confirmation part seulement une fois le paiement reçu (PaymentsService.finalize).
+    if (created.status === ReservationStatus.CONFIRMED) await this.notifier.confirmed(id);
+    return created;
+  }
+
+  async findMine(userId: number) {
+    const list = await this.baseQuery()
+      .where('r.userId = :userId', { userId })
+      .orderBy('r.startTime', 'DESC')
+      .getMany();
+    return list.map(ReservationResponseDto.from);
+  }
+
+  /** Liste admin avec filtres optionnels. */
+  async findAll(filter: ReservationFilterDto) {
+    const qb = this.baseQuery().orderBy('r.startTime', 'DESC');
+    if (filter.spaceId) qb.andWhere('seat.spaceId = :spaceId', { spaceId: filter.spaceId });
+    if (filter.userId) qb.andWhere('r.userId = :userId', { userId: filter.userId });
+    if (filter.status) qb.andWhere('r.status = :status', { status: filter.status });
+    if (filter.from) qb.andWhere('r.endTime >= :from', { from: new Date(filter.from) });
+    if (filter.to) qb.andWhere('r.startTime <= :to', { to: new Date(filter.to) });
+    return (await qb.getMany()).map(ReservationResponseDto.from);
+  }
+
+  /**
+   * Annulation : le propriétaire ou un admin. On garde la trace (statut CANCELLED).
+   * Payée → remboursement Stripe intégral ; un utilisateur ne peut plus annuler une fois le créneau commencé.
+   * En attente de paiement → on ferme la session Stripe pour empêcher un paiement tardif.
+   */
+  async cancel(id: number, requester: { id: number; role: Role }) {
+    const resa = await this.repo.findOne({ where: { id }, relations: { payment: true } });
+    if (!resa) throw new ResourceNotFoundException('Réservation');
+    const isAdmin = requester.role === Role.ADMIN;
+    if (resa.userId !== requester.id && !isAdmin) {
+      throw new ForbiddenException("Vous ne pouvez annuler que vos propres réservations.");
+    }
+    if (resa.status === ReservationStatus.CANCELLED) return this.findOneDto(id);
+
+    const payment = resa.payment;
+    if (payment?.status === PaymentStatus.PAID) {
+      if (!isAdmin && new Date(resa.startTime).getTime() <= Date.now()) {
+        throw new BadRequestException(
+          'Une réservation payée ne peut plus être annulée une fois le créneau commencé.',
+        );
+      }
+      if (payment.stripePaymentIntentId) await this.stripe.refund(payment.stripePaymentIntentId);
+      payment.status = PaymentStatus.REFUNDED;
+      payment.refundedAt = new Date();
+    } else if (payment?.status === PaymentStatus.PENDING) {
+      if (payment.stripeSessionId) await this.stripe.expireSession(payment.stripeSessionId);
+      payment.status = PaymentStatus.CANCELLED;
+    }
+
+    resa.status = ReservationStatus.CANCELLED;
+    await this.dataSource.transaction(async (m) => {
+      await m.save(Reservation, resa);
+      if (payment) await m.save(Payment, payment);
+    });
+    await this.notifier.cancelled(id, {
+      byAdmin: isAdmin && resa.userId !== requester.id,
+      refunded: payment?.status === PaymentStatus.REFUNDED,
+    });
+    return this.findOneDto(id);
+  }
+
+  async findOneDto(id: number) {
+    const resa = await this.baseQuery().where('r.id = :id', { id }).getOne();
+    if (!resa) throw new ResourceNotFoundException('Réservation');
+    return ReservationResponseDto.from(resa);
+  }
+
+  /** Réservation complète (place, espace, utilisateur, paiement) : utilisée pour Stripe et la facture. */
+  async findOneFull(id: number) {
+    const resa = await this.baseQuery().where('r.id = :id', { id }).getOne();
+    if (!resa) throw new ResourceNotFoundException('Réservation');
+    return resa;
+  }
+
+  // ---------- helpers ----------
+
+  private validateSlot(start: Date, end: Date) {
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      throw new BadRequestException('Dates invalides.');
+    }
+    if (end <= start) throw new BadRequestException('La fin doit être après le début.');
+    if (start.getTime() < Date.now() - CLOCK_TOLERANCE_MS) {
+      throw new BadRequestException('Impossible de réserver dans le passé.');
+    }
+    if (end.getTime() - start.getTime() > MAX_DURATION_MS) {
+      throw new BadRequestException('Une réservation ne peut pas dépasser 12 heures.');
+    }
+  }
+
+  private baseQuery() {
+    return this.repo
+      .createQueryBuilder('r')
+      .leftJoinAndSelect('r.seat', 'seat')
+      .leftJoinAndSelect('seat.space', 'space')
+      .leftJoinAndSelect('r.user', 'user')
+      .leftJoinAndSelect('r.payment', 'payment');
+  }
+}
